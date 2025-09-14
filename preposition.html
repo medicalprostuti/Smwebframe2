@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="bn">
+  <head>
+    <script>
+      document.addEventListener("contextmenu", (event) =>
+        event.preventDefault()
+      );
+      document.addEventListener("keydown", (event) => {
+        if (
+          (event.ctrlKey &&
+            ["u", "s", "i", "j"].includes(event.key.toLowerCase())) ||
+          event.key === "F12"
+        ) {
+          event.preventDefault();
+        }
+      });
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Online Exam</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap");
+
+      body {
+        font-family: "Hind Siliguri", sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .container {
+        font-family: "Hind Siliguri", sans-serif;
+        width: 100%;
+        margin: auto;
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        min-height: 80vh;
+      }
+
+      .exam-content {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      h1 {
+        color: #1b0b54;
+        text-align: center;
+        margin-bottom: 10px;
+      }
+
+      #timer {
+        font-size: 20px;
+        color: #1b0b54;
+        margin-bottom: 5px;
+        font-weight: normal;
+        text-align: center;
+      }
+
+      #exam-info {
+        font-size: 16px;
+        color: black;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      #exam {
+        width: 100%;
+        min-height: 100px;
+      }
+
+      .chart-container {
+        width: 200px;
+        height: 200px;
+        margin: 10px auto;
+        background-color: #f9f9f9;
+        border-radius: 15px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        display: none;
+        padding: 10px;
+      }
+
+      .chart-container.visible {
+        display: block;
+      }
+
+      .question-container {
+        text-align: left;
+        margin-bottom: 20px;
+        display: none;
+      }
+
+      .question-label {
+        font-weight: bold;
+        color: #1b0b54;
+        margin-bottom: 10px;
+      }
+
+      .options {
+        margin-top: 10px;
+      }
+
+      .option {
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 5px;
+        text-transform: uppercase;
+      }
+
+      .circle {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid #1b0b54;
+        margin-right: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #1b0b54;
+        font-weight: bold;
+        font-size: 18px;
+      }
+
+      .selected .circle {
+        background-color: #1b0b54;
+        color: white;
+      }
+
+      .correct-text {
+        color: green !important;
+      }
+
+      .incorrect-text {
+        color: #ff0800 !important;
+      }
+
+      .unattempted-text {
+        color: orange !important;
+      }
+
+      /* Updated CSS for submit button */
+      .button-container {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin-top: 20px; /* Added margin-top to separate from questions */
+      }
+
+      #submitBtn {
+        font-family: hind siliguri;
+        padding: 15px 30px;
+        background-color: #1b0b54;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: bold;
+        border-radius: 10px;
+        width: 200px;
+        transition: background-color 0.3s ease;
+      }
+
+      #submitBtn:hover {
+        background-color: #1b0b54;
+      }
+
+      .popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 20px;
+        width: 300px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        text-align: center;
+        display: none;
+        z-index: 1000;
+        transition: transform 0.5s ease, opacity 0.5s ease;
+      }
+
+      .popup.slide-out {
+        transform: translate(-50%, -100%);
+        opacity: 0;
+      }
+
+      .popup-header {
+        background-color: #1b0b54;
+        color: white;
+        padding: 10px;
+        font-size: 20px;
+        font-weight: bold;
+        border-radius: 10px 10px 0 0;
+      }
+
+      .popup-body {
+        padding: 15px;
+      }
+
+      .popup-body p {
+        margin: 10px 0;
+      }
+
+      .confirm-btn {
+        font-family: hind siliguri;
+        background-color: #34c759;
+        color: white;
+        padding: 8px 15px;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        border-radius: 5px;
+        margin: 5px;
+      }
+
+      .confirm-btn:hover {
+        background-color: #34c759;
+      }
+
+      .cancel-btn {
+        background-color: #ff3b30;
+        color: white;
+        padding: 8px 15px;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        border-radius: 5px;
+        margin: 5px;
+      }
+
+      .cancel-btn:hover {
+        background-color: #e02b21;
+      }
+
+      .explanation-dropdown {
+        display: none;
+        margin-top: 10px;
+      }
+
+      .explanation-dropdown.visible {
+        display: block;
+      }
+
+      .explanation-btn {
+        background-color: #1b0b54;
+        color: white;
+        padding: 8px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        font-family: "Hind Siliguri", sans-serif;
+        width: 40%;
+        text-align: left;
+        position: relative;
+      }
+
+      .explanation-btn:hover {
+        background-color: #1b0b54;
+      }
+
+      .explanation-btn::after {
+        content: "▼";
+        position: absolute;
+        right: 10px;
+        font-size: 12px;
+      }
+
+      .explanation-btn.active::after {
+        content: "▲";
+      }
+
+      .explanation-content {
+        display: none;
+        padding: 15px;
+        background-color: #f9f9f9;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 14px;
+        color: #000000;
+        text-align: left;
+        max-height: 450px;
+        overflow-y: auto;
+        margin-top: 5px;
+      }
+
+      .explanation-content.visible {
+        display: block;
+      }
+
+      .explanation-content p {
+        margin: 0 0 10px 0;
+      }
+
+      .explanation-content ul {
+        margin: 0;
+        padding-left: 20px;
+      }
+
+      .explanation-content li {
+        margin-bottom: 5px;
+      }
+
+      .explanation-content strong {
+        color: #1b0b54;
+      }
+
+      .explanation-label {
+        font-weight: bold;
+        color: #1b0b54;
+        margin-bottom: 10px;
+        display: block;
+      }
+
+      .locked .option {
+        pointer-events: none;
+        cursor: default;
+      }
+
+      .locked .option.selected {
+        pointer-events: none;
+        cursor: default;
+      }
+
+      /* Updated CSS for serial number input section */
+      .serial-input-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      .serial-input-container p {
+        color: #1b0b54;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+
+      .serial-input-container input {
+        width: 100%;
+        max-width: 250px;
+        padding: 10px;
+        font-size: 16px;
+        text-align: center;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        margin-bottom: 15px;
+        font-family: "Hind Siliguri", sans-serif; /* Added font-family */
+      }
+
+      .serial-input-container input::placeholder {
+        font-family: "Hind Siliguri", sans-serif; /* Added font-family to placeholder */
+      }
+
+      /* New styling for start exam button */
+      #startExamBtn {
+        font-family: hind siliguri;
+        padding: 12px 25px;
+        background-color: #1b0b54;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        border-radius: 8px;
+        width: 150px; /* Reduced width */
+        transition: background-color 0.3s ease;
+      }
+
+      #startExamBtn:hover {
+        background-color: #1b0b54;
+      }
+
+      /* Updated CSS for error popup */
+      #errorPopup {
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Reduced shadow */
+      }
+      #errorPopup .popup-body {
+        min-height: unset; /* Ensure height is minimal */
+        padding-bottom: 10px; /* Adjust padding as needed */
+      }
+      #errorPopup .popup-body p {
+        margin-top: 0;
+        margin-bottom: 15px; /* Adjust margin as needed */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container" id="examContainer">
+      <div class="exam-content">
+        <h1>Preposition Test</h1>
+        <div id="serialInputContainer" class="serial-input-container">
+          <p>HSC Roll লিখো:</p>
+          <input
+            type="number"
+            id="serialNumberInput"
+                        placeholder=""
+            maxlength="6"
+          />
+          <button id="startExamBtn">শুরু করো</button>
+        </div>
+        <div id="examContentArea" style="display: none">
+          <div id="timer"></div>
+          <div id="exam-info"></div>
+          <div class="chart-container">
+            <canvas id="scoreChart"></canvas>
+          </div>
+          <div id="exam">
+            </div>
+          <div class="button-container">
+            <button id="submitBtn">সাবমিট</rollbutton>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="popup" id="scorePopup">
+      <div class="popup-header">তোমার স্কোর</div>
+      <div class="popup-body">
+        <p>
+          <strong>HSC Roll:</strong> <span id="popupSerial"></span>
+        </p>
+        <p>
+          <strong>মোট প্রশ্ন:</strong> <span id="totalQuestions"></span>
+        </p>
+        <p>
+          <strong>উত্তর দিয়েছো:</strong>
+          <span style="color: #000000" id="answered"></span>
+        </p>
+        <p>
+          <strong>সঠিক উত্তর:</strong>
+          <span style="color: #0ab853" id="correctAnswers"></span>
+        </p>
+        <p>
+          <strong>ভুল উত্তর:</strong>
+          <span style="color: #f81010" id="wrongAnswers"></span>
+        </p>
+        <p>
+          <strong>অনুত্তরিত:</strong>
+          <span style="color: #ffc801" id="unanswered"></span>
+        </p>
+        <p><strong>তোমার চূড়ান্ত স্কোর:</strong></p>
+        <h2 style="color: #1b0b54"><span id="finalScore"></span></h2>
+        <form id="scoreForm" action="https://formspree.io/f/mblodpag" method="POST">
+          <input type="hidden" name="serialNumber" id="formSerialNumber" />
+          <input type="hidden" name="actionType" value="exam_submit" />
+          <input type="hidden" name="submissionTime" id="formSubmissionTime" />
+          <input type="hidden" name="finalScore" id="formFinalScore" />
+          <input type="hidden" name="correctAnswers" id="formCorrectAnswers" />
+          <input type="hidden" name="wrongAnswers" id="formWrongAnswers" />
+          <input type="hidden" name="unanswered" id="formUnanswered" />
+          <button
+            type="submit"
+            class="confirm-btn"
+            style="background-color: #1b0b54"
+          >
+            <b>ওকে</b>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="popup" id="confirmPopup">
+      <div class="popup-header">কনফার্ম করো</div>
+      <div class="popup-body">
+        <p>
+          ভালো করে দেখে নাও! <br />
+          পরীক্ষা শেষ করতে চাও তো?
+        </p>
+        <button class="confirm-btn" onclick="confirmSubmit()">
+          <b>হ্যাঁ</b>
+        </button>
+        <button class="cancel-btn" onclick="cancelSubmit()"><b>না</b></button>
+      </div>
+    </div>
+
+    <div class="popup" id="errorPopup">
+      <div class="popup-header">ত্রুটি</div>
+      <div class="popup-body">
+        <p>অবশ্যই Roll লিখতে হবে।</p>
+        <button class="confirm-btn" onclick="closeErrorPopup()">
+          <b>ওকে</b>
+        </button>
+      </div>
+    </div>
+
+    <script>
+      let chartInstance = null;
+      let serialNumber = "";
+      let examStartTime = null;
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const startExamBtn = document.getElementById("startExamBtn");
+        startExamBtn.addEventListener("click", startExam);
+
+        const submitBtn = document.getElementById("submitBtn");
+        submitBtn.addEventListener("click", showConfirmPopup);
+      });
+
+      function startExam() {
+        const serialNumberInput = document.getElementById("serialNumberInput");
+        const inputSerial = serialNumberInput.value.trim();
+
+        if (inputSerial.length !== 6|| isNaN(inputSerial)) {
+          showErrorPopup();
+          return;
+        }
+
+        serialNumber = inputSerial;
+        examStartTime = new Date().toISOString();
+
+        // Send start time data to Formspree in the background
+        sendFormspreeData({
+          serialNumber: serialNumber,
+          actionType: "exam_start",
+          startTime: examStartTime,
+        });
+
+        // Hide serial input and show exam content
+        document.getElementById("serialInputContainer").style.display = "none";
+        document.getElementById("examContentArea").style.display = "block";
+
+        generateQuestions();
+        startTimer();
+      }
+
+      function sendFormspreeData(data) {
+        const formData = new FormData();
+        for (const key in data) {
+          formData.append(key, data[key]);
+        }
+        const url = "https://formspree.io/f/xpwdgpby";
+        navigator.sendBeacon(url, formData);
+      }
+
+      const questions = [
+      {
+          id: 1,
+          question:
+            "Which of the following uses of the preposition 'but' is correct?",
+          options: {
+            a: "I am sure no one but he would do such a thing.",
+            b: "He does not seem to be interested in anything but play with toys.",
+            c: "I cannot but to admire the beauty of the mountain summit.",
+            d: "There is no alternative but to walk all the way home.",
+          },
+          correct: "d",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(d) There is no alternative but to walk all the way home</b>। এখানে <b>'but'</b> একটি <b>preposition</b> হিসেবে ব্যবহৃত হয়েছে এবং <b>'to walk'</b> ইনফিনিটিভকে অনুসরণ করেছে। এটি <b>'there is no alternative but to do something'</b> এই প্রচলিত কাঠামোকে নির্দেশ করে, যার অর্থ 'কিছু করা ছাড়া আর কোনো বিকল্প নেই'।</p><br><p><b>অপশন (a) I am sure no one but he would do such a thing:</b> এখানে <b>'but'</b> একটি <b>preposition</b> হিসেবে ব্যবহৃত হয়েছে, যার পরে একটি <b>objective pronoun (him)</b> ব্যবহার করা উচিত ছিল, <b>subjective pronoun (he)</b> নয়। সঠিক বাক্যটি হবে: I am sure no one but <b>him</b> would do such a thing।</p><br><p><b>অপশন (b) He does not seem to be interested in anything but play with toys:</b> এখানে <b>'but'</b> একটি <b>preposition</b> হিসেবে ব্যবহৃত হয়েছে। <b>'but'</b> এর পরে একটি <b>gerund</b> বা <b>noun phrase</b> ব্যবহার করা উচিত ছিল, কেবল <b>verb (play)</b> নয়। সঠিক বাক্যটি হবে: He does not seem to be interested in anything but <b>playing</b> with toys।</p><br><p><b>অপশন (c) I cannot but to admire the beauty of the mountain summit:</b> <b>'cannot but'</b> এর পরে একটি <b>bare infinitive (to ছাড়া verb)</b> বসবে, <b>'to admire'</b> হবে না। সঠিক বাক্যটি হবে: I cannot but <b>admire</b> the beauty of the mountain summit।</p>",
+        },
+        {
+          id: 2,
+          question: "Which of the following underlined preposition is correct?",
+          options: {
+            a: "He acquiesced in the proposal.",
+            b: "I am acquainted from him.",
+            c: "He is absorbed on thought.",
+            d: "I cannot accede in your request.",
+          },
+          correct: "a",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(a) He acquiesced in the proposal</b>। <b>'acquiesce'</b> শব্দের সাথে <b>'in' preposition</b> বসিয়ে কোনো প্রস্তাবে রাজি হওয়ার অর্থ প্রকাশ করা হয়।</p><br><p><b>অপশন (b) I am acquainted from him:</b> <b>'acquainted'</b> শব্দের সাথে সঠিক <b>preposition</b> হলো <b>'with'</b>। তাই সঠিক বাক্যটি হবে: I am acquainted <b>with</b> him।</p><br><p><b>অপশন (c) He is absorbed on thought:</b> <b>'absorbed'</b> শব্দের সাথে সঠিক <b>preposition</b> হলো <b>'in'</b>। তাই সঠিক বাক্যটি হবে: He is absorbed <b>in</b> thought।</p><br><p><b>অপশন (d) I cannot accede in your request:</b> <b>'accede'</b> শব্দের সাথে সঠিক <b>preposition</b> হলো <b>'to'</b>। তাই সঠিক বাক্যটি হবে: I cannot accede <b>to</b> your request।</p>",
+        },
+        {
+          id: 3,
+          question:
+            "In which of the following sentences 'but' is used as preposition?",
+          options: {
+            a: "There is no one but likes him.",
+            b: "We tried hard but did not succeed.",
+            c: "It is but right to admit our faults.",
+            d: "None but the brave deserves the fair.",
+          },
+          correct: "d",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(d) None but the brave deserves the fair</b>। এখানে <b>'but'</b> একটি <b>preposition</b> হিসেবে ব্যবহৃত হয়েছে যার অর্থ <b>'except' (ব্যতীত)</b>। <b>'Brave'</b> একটি <b>noun</b>-কে নির্দেশ করছে, যা <b>preposition</b>-এর <b>object</b> হিসেবে কাজ করছে।</p><br><p><b>অপশন (a) There is no one but likes him:</b> এখানে <b>'but'</b> একটি <b>conjunction</b> হিসেবে ব্যবহৃত হয়েছে, যার অর্থ <b>'who does not'</b> বা <b>'that does not'</b>।</p><br><p><b>অপশন (b) We tried hard but did not succeed:</b> এখানে <b>'but'</b> একটি <b>coordinating conjunction</b> হিসেবে দুটি স্বাধীন <b>clause</b> (we tried hard এবং did not succeed) কে যুক্ত করেছে।</p><br><p><b>অপশন (c) It is but right to admit our faults:</b> এখানে <b>'but'</b> একটি <b>adverb</b> হিসেবে ব্যবহৃত হয়েছে, যার অর্থ <b>'only'</b> বা <b>'merely'</b>।</p>",
+        },
+        {
+          id: 4,
+          question: "'Poll took place peacefully _ the country'.",
+          options: {
+            a: "across",
+            b: "besides",
+            c: "with",
+            d: "in",
+          },
+          correct: "a",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(a) across</b>। <b>'across' preposition</b> টি কোনো কিছুর এক প্রান্ত থেকে অন্য প্রান্ত পর্যন্ত বা সমগ্র এলাকা জুড়ে বোঝাতে ব্যবহৃত হয়। যেমন, <b>'across the country'</b> মানে <b>পুরো দেশজুড়ে</b>।</p><br><p><b>অপশন (b) besides:</b> <b>'besides'</b> অর্থ <b>'অতিরিক্ত'</b> বা <b>'এছাড়াও'</b>। এই বাক্যের জন্য এটি উপযুক্ত নয়।</p><br><p><b>অপশন (c) with:</b> <b>'with'</b> সাধারণত <b>'সাথে'</b> বা <b>'দ্বারা'</b> বোঝাতে ব্যবহৃত হয়।</p><br><p><b>অপশন (d) in:</b> <b>'in'</b> সাধারণত কোনো কিছুর ভেতরে বা একটি নির্দিষ্ট সীমার মধ্যে বোঝাতে ব্যবহৃত হয়। এখানে <b>'the country'</b> এর ব্যাপকতা বোঝাতে <b>'across'</b> বেশি উপযুক্ত।</p>",
+        },
+        {
+          id: 5,
+          question: "Choose the correct sentence -",
+          options: {
+            a: "She believes in ghost",
+            b: "She believes on ghost",
+            c: "She believes of ghost",
+            d: "She believes at ghost",
+          },
+          correct: "a",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(a) She believes in ghost</b>। <b>'believe in'</b> হলো একটি <b>phrasal verb</b>, যার অর্থ কোনো কিছুর অস্তিত্বে বিশ্বাস করা বা কোনো মতবাদকে সত্য বলে মেনে নেওয়া।</p><br><p><b>অপশন (b) She believes on ghost:</b> <b>'believe on'</b> এই ব্যবহারটি প্রচলিত নয়।</p><br><p><b>অপশন (c) She believes of ghost:</b> <b>'believe of'</b> এই ব্যবহারটিও প্রচলিত নয়।</p><p><b>অপশন (d) She believes at ghost:</b> <b>'believe at'</b> এই ব্যবহারটিও ভুল।</p>",
+        },
+        {
+          id: 6,
+          question:
+            "Which of the following sentence has the correct use of preposition?",
+          options: {
+            a: "He usually goes to bed in 11 O'clock.",
+            b: "You can't buy it at such price.",
+            c: "We were sitting into his bedroom.",
+            d: "He was born in a village at the district of Sirajgong.",
+          },
+          correct: "b",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(b) You can't buy it at such price</b>। <b>'at' preposition</b> টি নির্দিষ্ট মূল্য বা দাম বোঝাতে ব্যবহৃত হয়।</p><br><p><b>অপশন (a) He usually goes to bed in 11 O'clock:</b> নির্দিষ্ট সময় বোঝাতে <b>'at' preposition</b> ব্যবহৃত হয়, <b>'in'</b> নয়। সঠিক বাক্যটি হবে: He usually goes to bed <b>at</b> 11 O'clock।</p><br><p><b>অপশন (c) We were sitting into his bedroom:</b> <b>'into' preposition</b> গতিশীলতা বোঝাতে ব্যবহৃত হয়। এখানে <b>'sitting' (স্থির অবস্থা)</b> বোঝাতে <b>'in'</b> ব্যবহার করা উচিত ছিল। সঠিক বাক্যটি হবে: We were sitting <b>in</b> his bedroom।</p><br><p><b>অপশন (d) He was born in a village at the district of Sirajgong:</b> সাধারণত বড় স্থান যেমন জেলা বা শহর বোঝাতে <b>'in'</b> ব্যবহার করা হয়। তাই <b>'at the district'</b> না হয়ে <b>'in the district'</b> হবে। সঠিক বাক্যটি হবে: He was born in a village <b>in</b> the district of Sirajgong।</p>",
+        },
+        {
+          id: 7,
+          question: "The tree has been blown _ by the strong wind.",
+          options: {
+            a: "away",
+            b: "up",
+            c: "off",
+            d: "out",
+          },
+          correct: "a",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(a) away</b>। <b>'blow away'</b> মানে বাতাসের দ্বারা কোনো কিছুকে এক স্থান থেকে অন্য স্থানে সরিয়ে নিয়ে যাওয়া বা উড়িয়ে দেওয়া। শক্তিশালী বাতাস দ্বারা গাছ উপড়ে ফেলা বা ভেঙে ফেলার ক্ষেত্রে এটি ব্যবহৃত হয়।</p><br><p><b>অপশন (b) up:</b> <b>'blow up'</b> মানে বিস্ফোরণ ঘটিয়ে ধ্বংস করা।</p><br><p><b>অপশন (c) off:</b> <b>'blow off'</b> মানে কোনো কিছুকে জোরপূর্বক বিচ্ছিন্ন করা বা ঝেড়ে ফেলা।</p><br><p><b>অপশন (d) out:</b> <b>'blow out'</b> মানে আগুন নিভিয়ে ফেলা বা স্ফীত কোনো কিছুর বাতাস বের করে দেওয়া।</p>",
+        },
+        {
+          id: 8,
+          question: "The mistake has all been _ the teacher's point.",
+          options: {
+            a: "about",
+            b: "from",
+            c: "on",
+            d: "of",
+          },
+          correct: "b",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(b) from</b>। এখানে <b>'from'</b> দ্বারা ভুলটি শিক্ষকের দৃষ্টিকোণ থেকে বা তার দিক থেকে হয়েছে তা বোঝানো হয়েছে। অর্থাৎ, ভুলটি শিক্ষকের উপস্থাপনার ফল।</p><br><p><b>অপশন (a) about:</b> <b>'about'</b> সাধারণত কোনো বিষয় সম্পর্কে বোঝাতে ব্যবহৃত হয়।</p><br><p><b>অপশন (c) on:</b> <b>'on'</b> কোনো কিছুর উপর বা নির্দিষ্ট বিষয়ে বোঝাতে ব্যবহৃত হয়।</p><br><p><b>অপশন (d) of:</b> <b>'of'</b> সাধারণত সম্পর্ক, মালিকানা বা উপাদান বোঝাতে ব্যবহৃত হয়।</p>",
+        },
+        {
+          id: 9,
+          question: "She looked at her reflection _ the mirror.",
+          options: {
+            a: "on",
+            b: "upon",
+            c: "upon",
+            d: "into",
+          },
+          correct: "d",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(d) into</b>। <b>'into' preposition</b> টি সাধারণত কোনো কিছুর পৃষ্ঠে বা ভেতরে তাকানো বা প্রবেশ করা বোঝাতে ব্যবহৃত হয়, যেখানে একটি নির্দিষ্ট ফলাফল বা পরিবর্তন বোঝানো হয়। আয়নার ক্ষেত্রে, <b>reflection</b> দেখতে বা নিজেকে দেখতে আমরা <b>'look into the mirror'</b> ব্যবহার করি।</p><br><p><b>অপশন (a) on:</b> <b>'on'</b> সাধারণত কোনো কিছুর উপর স্থিরভাবে থাকা বোঝাতে ব্যবহৃত হয়।</p><br><p><b>অপশন (b) upon:</b> <b>'upon'</b> <b>'on'</b> এর মতোই, তবে এটি কিছুটা আনুষ্ঠানিক বা সাহিত্যিক ব্যবহার।</p><br><p><b>অপশন (c) upon:</b> এটি অপশন (b) এর মতোই।</p>",
+        },
+        {
+          id: 10,
+          question: "Appropriate preposition to be used with 'beware' is-",
+          options: {
+            a: "of",
+            b: "for",
+            c: "to",
+            d: "with",
+          },
+          correct: "a",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(a) of</b>। <b>'beware of'</b> একটি সঠিক <b>collocation</b>, যার অর্থ <b>'কোনো কিছু সম্পর্কে সতর্ক থাকা'</b> বা <b>'সাবধান হওয়া'</b>।</p><br><p><b>অপশন (b) for:</b> <b>'beware for'</b> ভুল ব্যবহার।</p><br><p><b>অপশন (c) to:</b> <b>'beware to'</b> ভুল ব্যবহার।</p><br><p><b>অপশন (d) with:</b> <b>'beware with'</b> ভুল ব্যবহার।</p>",
+        },
+        {
+          id: 11,
+          question: "Fill up the blank with an appropriate word _",
+          options: {
+            a: "of",
+            b: "for",
+            c: "to",
+            d: "with",
+          },
+          correct: "b",
+          explanation:
+            "<p>এই প্রশ্নটি অসম্পূর্ণ। একটি সম্পূর্ণ বাক্য ছাড়া সঠিক <b>preposition</b> নির্বাচন করা সম্ভব নয়। তবে, সাধারণত <b>'for'</b> বিভিন্ন উদ্দেশ্যে বা প্রাপ্তির জন্য ব্যবহৃত হয়। যেমন: <b>'This gift is for you.'</b></p>",
+        },
+        {
+          id: 12,
+          question: "Are you _ my taste.",
+          options: {
+            a: "for",
+            b: "to",
+            c: "in",
+            d: "by",
+          },
+          correct: "c",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(c) in</b>। <b>'in my taste'</b> বা <b>'in my opinion'</b> এর অর্থ <b>'আমার রুচি/মতে'</b>। এটি কোনো ব্যক্তি বা বস্তুর পছন্দ বা মতামতের সাথে সঙ্গতিপূর্ণ কিনা তা বোঝাতে ব্যবহৃত হয়।</p><br><p><b>অপশন (a) for:</b> <b>'for my taste'</b> এর ব্যবহার প্রচলিত নয়।</p><br><p><b>অপশন (b) to:</b> <b>'to my taste'</b> সাধারণত ব্যবহৃত হয়, যার অর্থ <b>'আমার রুচির জন্য উপযুক্ত'</b>। তবে <b>'in my taste'</b> বাক্যটির সাথে আরো বেশি মানানসই।</p><br><p><b>অপশন (d) by:</b> <b>'by my taste'</b> এই ব্যবহারটি ভুল।</p>",
+        },
+        {
+          id: 13,
+          question: "The girl burst _ tears.",
+          options: {
+            a: "into",
+            b: "on",
+            c: "with",
+            d: "in",
+          },
+          correct: "a",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(a) into</b>। <b>'burst into'</b> একটি <b>phrasal verb</b>, যার অর্থ হঠাৎ করে কোনো কিছু শুরু করা, যেমন: <b>'burst into tears'</b> (কেঁদে ফেলা), <b>'burst into laughter'</b> (হেসে ওঠা) ইত্যাদি।</p><br><p><b>অপশন (b) on:</b> <b>'burst on'</b> এই ব্যবহারটি প্রচলিত নয়।</p><br><p><b>অপশন (c) with:</b> <b>'burst with'</b> সাধারণত আবেগ বা ধারণক্ষমতা বোঝাতে ব্যবহৃত হয়, যেমন: <b>'bursting with joy'</b>।</p><br><p><b>অপশন (d) in:</b> <b>'burst in'</b> মানে জোর করে প্রবেশ করা।</p>",
+        },
+        {
+          id: 14,
+          question: "She was selected from _ 400 competitors.",
+          options: {
+            a: "among",
+            b: "near",
+            c: "toward",
+            d: "between",
+          },
+          correct: "a",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(a) among</b>। <b>'among' preposition</b> টি সাধারণত তিন বা ততোধিক ব্যক্তি বা বস্তুর মধ্যে বোঝাতে ব্যবহৃত হয়। এখানে <b>400</b> জন প্রতিযোগী থাকায় <b>'among'</b> ব্যবহার করা হয়েছে।</p><br><p><b>অপশন (b) near:</b> <b>'near'</b> মানে <b>'কাছে'</b>।</p><br><p><b>অপশন (c) toward:</b> <b>'toward'</b> মানে <b>'দিকে'</b>।</p><br><p><b>অপশন (d) between:</b> <b>'between'</b> সাধারণত শুধুমাত্র দুটি ব্যক্তি বা বস্তুর মধ্যে বোঝাতে ব্যবহৃত হয়।</p>",
+        },
+        {
+          id: 15,
+          question: "Warning! No unauthorized personnel _ this point.",
+          options: {
+            a: "about",
+            b: "beyond",
+            c: "here",
+            d: "then",
+          },
+          correct: "b",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(b) beyond</b>। <b>'beyond' preposition</b> টি কোনো নির্দিষ্ট সীমা বা বিন্দুর <b>'অতিক্রম'</b> বা <b>'পেরিয়ে'</b> বোঝাতে ব্যবহৃত হয়। এখানে <b>'No unauthorized personnel beyond this point'</b> অর্থ হলো 'এই বিন্দুর পর অননুমোদিত ব্যক্তির প্রবেশ নিষেধ'।</p><br><p><b>অপশন (a) about:</b> <b>'about'</b> মানে <b>'সম্পর্কে'</b> বা <b>'কাছাকাছি'</b>।</p><br><p><b>অপশন (c) here:</b> <b>'here'</b> একটি <b>adverb</b> যার অর্থ <b>'এখানে'</b>। এটি <b>preposition</b> নয়।</p><br><p><b>অপশন (d) then:</b> <b>'then'</b> একটি <b>adverb</b> যার অর্থ <b>'তারপর'</b> বা <b>'তখন'</b>। এটি <b>preposition</b> নয়।</p>",
+        },
+        {
+          id: 16,
+          question:
+            "There is a liberation sculpture _ the building of the University of Dhaka.",
+          options: {
+            a: "before",
+            b: "in front of",
+            c: "beside",
+            d: "at the back",
+          },
+          correct: "b",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(b) in front of</b>। <b>'in front of'</b> মানে কোনো কিছুর <b>'সামনে'</b> বা <b>'সম্মুখে'</b>। একটি ভবনের সামনে কিছু স্থাপন করা বোঝাতে এটিই সবচেয়ে উপযুক্ত।</p><br><p><b>অপশন (a) before:</b> <b>'before'</b> সাধারণত সময়ের আগে বা মর্যাদার দিক থেকে আগে বোঝাতে ব্যবহৃত হয়। স্থানের ক্ষেত্রে এটি খুব কম ব্যবহৃত হয়।</p><br><p><b>অপশন (c) beside:</b> <b>'beside'</b> মানে <b>'পাশে'</b>।</p><br><p><b>অপশন (d) at the back:</b> <b>'at the back'</b> মানে <b>'পেছনে'</b>।</p>",
+        },
+        {
+          id: 17,
+          question: "I haven't seen her _ the last few years.",
+          options: {
+            a: "since",
+            b: "in",
+            c: "after",
+            d: "before",
+          },
+          correct: "a",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(a) since</b>। <b>'since'</b> নির্দিষ্ট কোনো সময়ের শুরু থেকে বর্তমান পর্যন্ত সময়কাল বোঝাতে ব্যবহৃত হয়, সাধারণত <b>perfect tense</b> এর সাথে। এখানে <b>'the last few years'</b> একটি নির্দিষ্ট সময়ের শুরুর দিক নির্দেশ করে (যদিও সেটি অস্পষ্ট), যার থেকে এখন পর্যন্ত দেখা না হওয়ার ঘটনাকে নির্দেশ করছে।</p><br><p><b>অপশন (b) in:</b> <b>'in'</b> একটি সময়ের মধ্যে বোঝাতে ব্যবহৃত হয়, কিন্তু এখানে সময়কাল ধরে বোঝাতে <b>'since'</b> বেশি উপযুক্ত।</p><br><p><b>অপশন (c) after:</b> <b>'after'</b> মানে <b>'পরে'</b>।</p><br><p><b>অপশন (d) before:</b> <b>'before'</b> মানে <b>'আগে'</b>।</p>",
+        },
+        {
+          id: 18,
+          question: "Did you watch the cricket game _ TV last night?",
+          options: {
+            a: "in",
+            b: "of",
+            c: "into",
+            d: "on",
+          },
+          correct: "d",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(d) on</b>। টেলিভিশন বা রেডিওতে কোনো অনুষ্ঠান দেখার বা শোনার ক্ষেত্রে সাধারণত <b>'on' preposition</b> ব্যবহৃত হয়। যেমন: <b>'on TV'</b>, <b>'on the radio'</b>।</p><br><p><b>অপশন (a) in:</b> <b>'in'</b> সাধারণত কোনো কিছুর ভেতরে বোঝাতে ব্যবহৃত হয়।</p><br><p><b>অপশন (b) of:</b> <b>'of'</b> সাধারণত সম্পর্ক বা মালিকানা বোঝাতে ব্যবহৃত হয়।</p><br><p><b>অপশন (c) into:</b> <b>'into'</b> সাধারণত গতিশীলতা বোঝাতে ব্যবহৃত হয়।</p>",
+        },
+        {
+          id: 19,
+          question:
+            "The police tried to blame the accident _ the poor rickshaw puller.",
+          options: {
+            a: "for",
+            b: "to",
+            c: "over",
+            d: "on",
+          },
+          correct: "d",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(d) on</b>। <b>'blame (something) on (someone)'</b> মানে কোনো কিছুর জন্য কাউকে দায়ী করা বা দোষারোপ করা।</p><br><p><b>অপশন (a) for:</b> <b>'blame for'</b> সাধারণত কোনো ভুলের জন্য দায়ী হওয়ার অর্থে ব্যবহৃত হয়। যেমন: <b>'He was blamed for the mistake.'</b></p><br><p><b>অপশন (b) to:</b> <b>'blame to'</b> এই ব্যবহারটি প্রচলিত নয়।</p><br><p><b>অপশন (c) over:</b> <b>'blame over'</b> এই ব্যবহারটিও প্রচলিত নয়।</p>",
+        },
+        {
+          id: 20,
+          question: "The shops here are open _ 9 am to 7 pm.",
+          options: {
+            a: "from",
+            b: "for",
+            c: "on",
+            d: "at",
+          },
+          correct: "a",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(a) from</b>। সময়সীমা বোঝাতে <b>'from... to...'</b> কাঠামো ব্যবহৃত হয়, যার অর্থ <b>'অমুক সময় থেকে তমুক সময় পর্যন্ত'</b>।</p><br><p><b>অপশন (b) for:</b> <b>'for'</b> একটি সময়কাল বোঝাতে ব্যবহৃত হয়, যেমন: <b>'for two hours'</b>।</p><br><p><b>অপশন (c) on:</b> <b>'on'</b> সাধারণত নির্দিষ্ট দিন বা তারিখ বোঝাতে ব্যবহৃত হয়।</p><br><p><b>অপশন (d) at:</b> <b>'at'</b> নির্দিষ্ট সময় বোঝাতে ব্যবহৃত হয়।</p>",
+        },
+        {
+          id: 21,
+          question:
+            "There's paper _ the floor. Please put it _ the wastebasket.",
+          options: {
+            a: "at, into",
+            b: "on, at",
+            c: "on, in",
+            d: "over, at",
+          },
+          correct: "c",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(c) on, in</b>। প্রথম শূন্যস্থানে <b>'on'</b> হবে কারণ কাগজ মেঝের <b>'উপর'</b> আছে (on the floor)। দ্বিতীয় শূন্যস্থানে <b>'in'</b> হবে কারণ কাগজটি <b>wastebasket</b>-এর <b>'ভেতরে'</b> রাখতে হবে (in the wastebasket)। যদিও <b>'into'</b> ও গতি বোঝাতে ব্যবহৃত হয়, এখানে <b>'in'</b> বেশি স্বাভাবিক কারণ <b>wastebasket</b> একটি আবদ্ধ স্থান।</p><br><p><b>অপশন (a) at, into:</b> <b>'at the floor'</b> ভুল ব্যবহার।</p><br><p><b>অপশন (b) on, at:</b> <b>'at the wastebasket'</b> ভুল ব্যবহার।</p><br><p><b>অপশন (d) over, at:</b> <b>'over the floor'</b> ভুল ব্যবহার।</p>",
+        },
+        {
+          id: 22,
+          question:
+            "_ Pohela Boishakh, there is a festive mood all _ the country.",
+          options: {
+            a: "at, over",
+            b: "in, across",
+            c: "since, across",
+            d: "on, over",
+          },
+          correct: "d",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(d) on, over</b>। প্রথম শূন্যস্থানে <b>'on'</b> হবে কারণ নির্দিষ্ট দিন বোঝাতে <b>'on'</b> ব্যবহার করা হয় (on Pohela Boishakh)। দ্বিতীয় শূন্যস্থানে <b>'over'</b> হবে কারণ <b>'all over the country'</b> মানে <b>'পুরো দেশজুড়ে'</b> একটি উৎসবের মেজাজ বিরাজমান।</p><br><p><b>অপশন (a) at, over:</b> <b>'at Pohela Boishakh'</b> নির্দিষ্ট দিনের জন্য ভুল।</p><br><p><b>অপশন (b) in, across:</b> <b>'in Pohela Boishakh'</b> ভুল এবং <b>'across the country'</b> সঠিক হলেও প্রথম অংশের জন্য এটি উপযুক্ত নয়।</p><br><p><b>অপশন (c) since, across:</b> <b>'since Pohela Boishakh'</b> একটি নির্দিষ্ট সময় থেকে শুরু করে বোঝাতে ব্যবহৃত হয়, যা এই বাক্যে প্রযোজ্য নয়।</p>",
+        },
+        {
+          id: 23,
+          question: "He felt bad _ no reason at all.",
+          options: {
+            a: "of",
+            b: "at",
+            c: "then",
+            d: "none",
+          },
+          correct: "d",
+          explanation:
+            "<p>এই বাক্যটির সঠিক ব্যবহার হলো <b>'for no reason at all'</b>, কিন্তু প্রদত্ত অপশনগুলোতে <b>'for'</b> নেই। এই ধরনের ক্ষেত্রে <b>'none'</b> অপশনটি নির্দেশ করে যে প্রদত্ত অপশনগুলোর মধ্যে কোনোটিই সঠিক নয়। তাই ব্যাখ্যায়, সঠিক উত্তরটি উল্লেখ করে কেন অন্যান্য অপশনগুলো ভুল তা বলা হয়েছে।</p><br><p>সঠিক বাক্যটি হবে: He felt bad <b>for</b> no reason at all।</p><br><p><b>অপশন (a) of:</b> <b>'of no reason'</b> ভুল ব্যবহার।</p><br><p><b>অপশন (b) at:</b> <b>'at no reason'</b> ভুল ব্যবহার।</p><br><p><b>অপশন (c) then:</b> <b>'then'</b> একটি <b>adverb</b> এবং এখানে উপযুক্ত নয়।</p>",
+        },
+        {
+          id: 24,
+          question: "Many men and women aspire to _ presidency.",
+          options: {
+            a: "at",
+            b: "on",
+            c: "in",
+            d: "upon",
+          },
+          correct: "c",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(c) in</b>। <b>'aspire to'</b> হলো একটি <b>phrasal verb</b> যার অর্থ <b>'কোনো কিছু উচ্চাকাঙ্ক্ষা করা'</b> বা <b>'কোনো কিছু হতে চাওয়া'</b>। এখানে <b>'presidency'</b> একটি পদ বা অবস্থা বোঝানো হয়েছে, এবং সেই পদ বা অবস্থার মধ্যে থাকা বা অর্জন করা বোঝাতে <b>'in'</b> ব্যবহার করা হয়। যেমন: <b>'aspire to be in presidency'</b>।</p><br><p><b>অপশন (a) at:</b> <b>'at presidency'</b> ভুল ব্যবহার।</p><br><p><b>অপশন (b) on:</b> <b>'on presidency'</b> ভুল ব্যবহার।</p><br><p><b>অপশন (d) upon:</b> <b>'upon presidency'</b> ভুল ব্যবহার।</p>",
+        },
+        {
+          id: 25,
+          question: "He stood before me. The underlined word is _",
+          options: {
+            a: "Noun",
+            b: "Adverb",
+            c: "Verb",
+            d: "Preposition",
+          },
+          correct: "d",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(d) Preposition</b>। <b>'before'</b> এখানে একটি <b>preposition</b> হিসেবে ব্যবহৃত হয়েছে, যা <b>'me' (pronoun)</b> এর সাথে <b>'stood' (verb)</b> এর সম্পর্ক স্থাপন করে এবং <b>'স্থান'</b> বোঝায়। এর অর্থ <b>'আমার সামনে'</b>।</p><br><p><b>অপশন (a) Noun:</b> <b>Noun</b> কোনো ব্যক্তি, বস্তু, স্থান বা ধারণার নাম বোঝায়।</p><br><p><b>অপশন (b) Adverb:</b> <b>Adverb</b> সাধারণত <b>verb, adjective</b> বা অন্য <b>adverb</b> কে বর্ণনা করে।</p><br><p><b>অপশন (c) Verb:</b> <b>Verb</b> কোনো কাজ বা অবস্থা বোঝায়।</p>",
+        },
+        {
+          id: 26,
+          question: "Please leave your key _ the reception.",
+          options: {
+            a: "in",
+            b: "on",
+            c: "at",
+            d: "with",
+          },
+          correct: "c",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(c) at</b>। <b>'at the reception'</b> মানে <b>'রিসেপশনে'</b> বা <b>'রিসেপশন ডেস্কে'</b>। এটি একটি নির্দিষ্ট স্থান নির্দেশ করে যেখানে কোনো কিছু জমা রাখা বা সংগ্রহ করা হয়।</p><br><p><b>অপশন (a) in:</b> <b>'in the reception'</b> সাধারণত রিসেপশন এলাকার ভেতরে বোঝাতে ব্যবহৃত হয়, কিন্তু কোনো কিছু জমা রাখার ক্ষেত্রে <b>'at'</b> বেশি উপযুক্ত।</p><br><p><b>অপশন (b) on:</b> <b>'on the reception'</b> মানে রিসেপশনের <b>'উপরে'</b>, যা এখানে প্রযোজ্য নয়।</p><br><p><b>অপশন (d) with:</b> <b>'with the reception'</b> মানে রিসেপশনের <b>'সাথে'</b>, যা ব্যাকরণগতভাবে ভুল।</p>",
+        },
+        {
+          id: 27,
+          question: "_ is it difficult _ dispose _ waste?",
+          options: {
+            a: "Where, to, for",
+            b: "When, for, such",
+            c: "Why, with, in",
+            d: "Why, to, of",
+          },
+          correct: "d",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(d) Why, to, of</b>। বাক্যটির সঠিক রূপ হলো <b>'Why is it difficult to dispose of waste?'</b>।</p><br><p>প্রথম শূন্যস্থানে <b>'Why'</b> বসবে, কারণ এটি একটি কারণ জানতে চাওয়া প্রশ্ন।</p><br><p>দ্বিতীয় শূন্যস্থানে <b>'to'</b> বসবে, কারণ <b>'dispose'</b> এর সাথে <b>infinitive 'to'</b> বসে।</p><br><p>তৃতীয় শূন্যস্থানে <b>'of'</b> বসবে, কারণ <b>'dispose of'</b> একটি <b>phrasal verb</b> যার অর্থ <b>'কোনো কিছু ফেলে দেওয়া'</b> বা <b>'নিষ্পত্তি করা'</b>।</p>",
+        },
+        {
+          id: 28,
+          question: "He got a _ of land _ his village.",
+          options: {
+            a: "lease, on",
+            b: "slice, into",
+            c: "plot, through",
+            d: "lease, in",
+          },
+          correct: "d",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(d) lease, in</b>। বাক্যটির সঠিক রূপ হলো <b>'He got a lease of land in his village.'</b></p><br><p>প্রথম শূন্যস্থানে <b>'lease'</b> বসবে, কারণ <b>'lease of land'</b> মানে <b>'জমির ইজারা'</b> বা <b>'স্থায়ী বন্দোবস্ত'</b>।</p><br><p>দ্বিতীয় শূন্যস্থানে <b>'in'</b> বসবে, কারণ <b>'in his village'</b> মানে <b>'তার গ্রামে'</b>।</p><br><p><b>অপশন (a) lease, on:</b> <b>'on his village'</b> ভুল ব্যবহার।</p><br><p><b>অপশন (b) slice, into:</b> <b>'slice of land'</b> সাধারণত ব্যবহৃত হয় না, এবং <b>'into his village'</b> ভুল ব্যবহার।</p><br><p><b>অপশন (c) plot, through:</b> <b>'plot of land'</b> সঠিক হলেও, <b>'through his village'</b> এই বাক্যের জন্য উপযুক্ত নয়।</p>",
+        },
+        {
+          id: 29,
+          question:
+            "The driver stopped the car just _ time to avoid collision.",
+          options: {
+            a: "in",
+            b: "by",
+            c: "of",
+            d: "in",
+          },
+          correct: "a",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(a) in</b>। <b>'in time'</b> একটি <b>idiom</b>, যার অর্থ <b>'নির্দিষ্ট সময়ের মধ্যে'</b> বা <b>'যথা সময়ে'</b>। সংঘর্ষ এড়ানোর জন্য চালক সঠিক সময়ে গাড়ি থামিয়েছেন।</p><br><p><b>অপশন (b) by:</b> <b>'by time'</b> এই বাক্যের জন্য উপযুক্ত নয়।</p><br><p><b>অপশন (c) of:</b> <b>'of time'</b> এই ব্যবহারটি ভুল।</p><br><p><b>অপশন (d) in:</b> এই অপশনটি (a) এর মতোই।</p>",
+        },
+        {
+          id: 30,
+          question:
+            "Fill in the blank with appropriate preposition. The guest will come _ the afternoon.",
+          options: {
+            a: "at",
+            b: "in",
+            c: "by",
+            d: "on",
+          },
+          correct: "b",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(b) in</b>। দিনের অংশ বোঝাতে <b>'in' preposition</b> ব্যবহৃত হয়, যেমন: <b>'in the morning'</b>, <b>'in the afternoon'</b>, <b>'in the evening'</b>। তবে রাতের ক্ষেত্রে <b>'at night'</b> ব্যবহৃত হয়।</p><br><p><b>অপশন (a) at:</b> <b>'at'</b> নির্দিষ্ট সময় বোঝাতে ব্যবহৃত হয়, যেমন: <b>'at 3 o'clock'</b>।</p><br><p><b>অপশন (c) by:</b> <b>'by'</b> কোনো নির্দিষ্ট সময়ের মধ্যে বোঝাতে ব্যবহৃত হয়, যেমন: <b>'by tomorrow'</b>।</p><br><p><b>অপশন (d) on:</b> <b>'on'</b> সাধারণত নির্দিষ্ট দিন বা তারিখ বোঝাতে ব্যবহৃত হয়, যেমন: <b>'on Monday'</b>।</p>",
+        },
+        {
+          id: 31,
+          question: "AI has brought _ a revolution _ modern technology.",
+          options: {
+            a: "with, on",
+            b: "on, in",
+            c: "towards, for",
+            d: "for, in",
+          },
+          correct: "d",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(d) for, in</b>। এই বাক্যটির সঠিক রূপ হলো <b>'AI has brought for a revolution in modern technology.'</b></p><br><p>প্রথম শূন্যস্থানে <b>'for'</b> বসবে, কারণ <b>'bring for'</b> মানে <b>'কোনো কিছুর জন্য কিছু আনা'</b> বা <b>'কোনো কিছুর সূচনা করা'</b>। এখানে <b>AI</b> আধুনিক প্রযুক্তির জন্য একটি বিপ্লব এনেছে।</p><br><p>দ্বিতীয় শূন্যস্থানে <b>'in'</b> বসবে, কারণ <b>'in modern technology'</b> মানে <b>'আধুনিক প্রযুক্তির ক্ষেত্রে'</b> বা <b>'আধুনিক প্রযুক্তিতে'</b>।</p>",
+        },
+        {
+          id: 32,
+          question: "I would like a complete breakdown _ these figures.",
+          options: {
+            a: "about, in",
+            b: "of, to",
+            c: "upon, in",
+            d: "in, for",
+          },
+          correct: "b",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(b) of, to</b>। এই বাক্যটির সঠিক রূপ হলো <b>'I would like a complete breakdown of these figures.'</b> (যদিও দ্বিতীয় শূন্যস্থানটি এই বাক্যে অপ্রয়োজনীয়)। <b>'breakdown of something'</b> মানে কোনো কিছুর বিস্তারিত বিশ্লেষণ।</p><br><p><b>অপশন (a) about, in:</b> <b>'breakdown about'</b> এই ব্যবহারটি প্রচলিত নয়।</p><br><p><b>অপশন (c) upon, in:</b> <b>'breakdown upon'</b> এই ব্যবহারটি প্রচলিত নয়।</p><br><p><b>অপশন (d) in, for:</b> <b>'breakdown in'</b> সাধারণত কোনো কিছুর কার্যকারিতা নষ্ট হওয়া বোঝায়, যেমন: <b>'a breakdown in communication'</b>।</p>",
+        },
+        {
+          id: 33,
+          question: "The enemy is _ us to create chaos and confusion.",
+          options: {
+            a: "amidst",
+            b: "amidst of",
+            c: "amidst behind",
+            d: "amidst for",
+          },
+          correct: "a",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(a) amidst</b>। <b>'amidst'</b> মানে <b>'মাঝখানে'</b> বা <b>'মধ্যে'</b>। এখানে শত্রু আমাদের মধ্যে বিশৃঙ্খলা সৃষ্টি করতে চাইছে।</p><br><p><b>অপশন (b) amidst of:</b> <b>'amidst of'</b> ভুল ব্যবহার। <b>'of'</b> যোগ করার প্রয়োজন নেই।</p><br><p><b>অপশন (c) amidst behind:</b> <b>'amidst behind'</b> ভুল ব্যবহার।</p><br><p><b>অপশন (d) amidst for:</b> <b>'amidst for'</b> ভুল ব্যবহার।</p>",
+        },
+        {
+          id: 34,
+          question: "A modest man does not boast _ his merit.",
+          options: {
+            a: "of",
+            b: "on",
+            c: "for",
+            d: "with",
+          },
+          correct: "a",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(a) of</b>। <b>'boast of'</b> একটি <b>phrasal verb</b> যার অর্থ <b>'নিজেকে নিয়ে গর্ব করা'</b> বা <b>'নিজের গুণগান করা'</b>।</p><br><p><b>অপশন (b) on:</b> <b>'boast on'</b> ভুল ব্যবহার।</p><br><p><b>অপশন (c) for:</b> <b>'boast for'</b> ভুল ব্যবহার।</p><br><p><b>অপশন (d) with:</b> <b>'boast with'</b> ভুল ব্যবহার।</p>",
+        },
+        {
+          id: 35,
+          question:
+            "Dairy farming is _ leading agricultural activity in Australia.",
+          options: {
+            a: "a",
+            b: "an",
+            c: "the",
+            d: "no article",
+          },
+          correct: "c",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(c) the</b>। এখানে <b>'leading'</b> একটি <b>superlative adjective</b>, যা <b>'leading agricultural activity'</b> কে নির্দিষ্ট করছে। <b>superlative adjective</b> এর আগে সাধারণত <b>'the' definite article</b> বসে।</p><br><p><b>অপশন (a) a:</b> <b>'a'</b> অনির্দিষ্ট <b>singular noun</b> এর আগে বসে।</p><br><p><b>অপশন (b) an:</b> <b>'an'</b> স্বরধ্বনি দিয়ে শুরু হওয়া অনির্দিষ্ট <b>singular noun</b> এর আগে বসে।</p><br><p><b>অপশন (d) no article:</b> এখানে একটি <b>article</b> এর প্রয়োজন আছে।</p>",
+        },
+        {
+          id: 36,
+          question: "Our flat is _ the second floor of the building.",
+          options: {
+            a: "of",
+            b: "on",
+            c: "in",
+            d: "for",
+          },
+          correct: "b",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(b) on</b>। ফ্লোর বা তলা বোঝাতে <b>'on' preposition</b> ব্যবহৃত হয়। যেমন: <b>'on the first floor'</b>, <b>'on the ground floor'</b>।</p><br><p><b>অপশন (a) of:</b> <b>'of'</b> সাধারণত সম্পর্ক বা মালিকানা বোঝাতে ব্যবহৃত হয়।</p><br><p><b>অপশন (c) in:</b> <b>'in'</b> সাধারণত কোনো কিছুর ভেতরে বোঝাতে ব্যবহৃত হয়।</p><br><p><b>অপশন (d) for:</b> <b>'for'</b> সাধারণত উদ্দেশ্য বা সময়কাল বোঝাতে ব্যবহৃত হয়।</p>",
+        },
+        {
+          id: 37,
+          question:
+            "_ the year 2009 and 2014, I was a student of the University of Chittagong.",
+          options: {
+            a: "From",
+            b: "Since",
+            c: "Between",
+            d: "Both",
+          },
+          correct: "c",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(c) Between</b>। দুটি নির্দিষ্ট সময়ের মধ্যবর্তী সময়কাল বোঝাতে <b>'between... and...'</b> কাঠামো ব্যবহৃত হয়। এখানে <b>2009</b> এবং <b>2014</b> সালের মধ্যবর্তী সময়কাল বোঝানো হয়েছে।</p><br><p><b>অপশন (a) From:</b> <b>'From... to...'</b> একটি নির্দিষ্ট সময় থেকে অন্য নির্দিষ্ট সময় পর্যন্ত বোঝাতে ব্যবহৃত হয়। যেমন: <b>'From 2009 to 2014'</b>।</p><br><p><b>অপশন (b) Since:</b> <b>'Since'</b> নির্দিষ্ট কোনো সময়ের শুরু থেকে বর্তমান পর্যন্ত সময়কাল বোঝাতে ব্যবহৃত হয়।</p><br><p><b>অপশন (d) Both:</b> এই অপশনটি এখানে প্রযোজ্য নয়।</p>",
+        },
+        {
+          id: 38,
+          question: "I'll meet you again _ the weekend.",
+          options: {
+            a: "by",
+            b: "on",
+            c: "at",
+            d: "for",
+          },
+          correct: "b",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(b) on</b>। সপ্তাহান্ত (weekend) বোঝাতে <b>'on the weekend'</b> বা <b>'at the weekend'</b> উভয়ই সঠিক। আমেরিকান ইংরেজিতে <b>'on the weekend'</b> এবং ব্রিটিশ ইংরেজিতে <b>'at the weekend'</b> বেশি প্রচলিত। যেহেতু প্রশ্নটিতে কোনো নির্দিষ্ট <b>dialect</b> উল্লেখ করা হয়নি, <b>'on'</b> একটি সঠিক বিকল্প।</p><br><p><b>অপশন (a) by:</b> <b>'by the weekend'</b> মানে সপ্তাহান্তের মধ্যে।</p><br><p><b>অপশন (c) at:</b> <b>'at the weekend'</b> ব্রিটিশ ইংরেজিতে প্রচলিত।</p><br><p><b>অপশন (d) for:</b> <b>'for the weekend'</b> মানে সপ্তাহান্তের জন্য।</p>",
+        },
+        {
+          id: 39,
+          question: "This book is _ far the best one he has ever written.",
+          options: {
+            a: "by",
+            b: "to",
+            c: "at",
+            d: "above",
+          },
+          correct: "a",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(a) by</b>। <b>'by far'</b> একটি <b>idiomatic expression</b>, যার অর্থ <b>'অনেক বেশি'</b> বা <b>'নিঃসন্দেহে'</b>। এটি <b>superlative adjective</b> এর সাথে ব্যবহৃত হয়ে কোনো কিছুর শ্রেষ্ঠত্ব বা পার্থক্যকে জোর দেয়।</p><br><p><b>অপশন (b) to:</b> <b>'to far'</b> ভুল ব্যবহার।</p><br><p><b>অপশন (c) at:</b> <b>'at far'</b> ভুল ব্যবহার।</p><br><p><b>অপশন (d) above:</b> <b>'above far'</b> ভুল ব্যবহার।</p>",
+        },
+        {
+          id: 40,
+          question: "I will talk to you _ telephone.",
+          options: {
+            a: "over",
+            b: "through",
+            c: "by",
+            d: "with",
+          },
+          correct: "c",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(c) by</b>। যোগাযোগ মাধ্যমের ক্ষেত্রে <b>'by telephone'</b>, <b>'by email'</b>, <b>'by post'</b> ইত্যাদি ব্যবহৃত হয়। তবে <b>'on the telephone'</b> বা <b>'over the phone'</b> ও ব্যবহৃত হয়।</p><br><p><b>অপশন (a) over:</b> <b>'over the telephone'</b> সঠিক, কিন্তু <b>'over telephone'</b> ভুল।</p><br><p><b>অপশন (b) through:</b> <b>'through telephone'</b> ভুল ব্যবহার।</p><br><p><b>অপশন (d) with:</b> <b>'with telephone'</b> ভুল ব্যবহার।</p>",
+        },
+        {
+          id: 41,
+          question: "Father has not yet come _ home.",
+          options: {
+            a: "to",
+            b: "in",
+            c: "upon",
+            d: "no preposition is required",
+          },
+          correct: "d",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(d) no preposition is required</b>। <b>'home'</b> যখন একটি <b>adverb</b> হিসেবে <b>'to home'</b> বা <b>'at home'</b> এর অর্থ প্রকাশ করে, তখন এর আগে কোনো <b>preposition</b> এর প্রয়োজন হয় না। <b>'Come home'</b> মানে <b>'বাড়িতে আসা'</b>।</p><br><p><b>অপশন (a) to:</b> <b>'to home'</b> ব্যাকরণগতভাবে ভুল।</p><br><p><b>অপশন (b) in:</b> <b>'in home'</b> ভুল ব্যবহার।</p><br><p><b>অপশন (c) upon:</b> <b>'upon home'</b> ভুল ব্যবহার।</p>",
+        },
+        {
+          id: 42,
+          question: "5 _ 30 is 6. The right preposition here is:",
+          options: {
+            a: "in",
+            b: "into",
+            c: "by",
+            d: "among",
+          },
+          correct: "c",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(c) by</b>। গাণিতিক বিভাজনে <b>'divided by'</b> বোঝাতে <b>'by'</b> ব্যবহৃত হয়। যেমন: <b>'30 divided by 5 is 6'</b> বা <b>'5 goes into 30 by 6 times'</b>। এখানে <b>'5 by 30 is 6'</b> মানে <b>'30 কে 5 দিয়ে ভাগ করলে 6 হয়'</b>।</p><br><p><b>অপশন (a) in:</b> গাণিতিক বিভাজনে <b>'in'</b> ব্যবহৃত হয় না।</p><br><p><b>অপশন (b) into:</b> <b>'into'</b> সাধারণত গতিশীলতা বোঝাতে ব্যবহৃত হয়। যেমন: <b>'5 goes into 30 six times'</b>।</p><br><p><b>অপশন (d) among:</b> <b>'among'</b> সাধারণত তিন বা ততোধিক ব্যক্তি বা বস্তুর মধ্যে বোঝাতে ব্যবহৃত হয়।</p>",
+        },
+        {
+          id: 43,
+          question:
+            "I am waiting for Shreya who should have arrived at the station _ now.",
+          options: {
+            a: "at",
+            b: "in",
+            c: "by",
+            d: "over",
+          },
+          correct: "c",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(c) by</b>। <b>'by now'</b> মানে <b>'এখন পর্যন্ত'</b> বা <b>'এই সময়ের মধ্যে'</b>। এটি একটি নির্দিষ্ট সময়সীমা বোঝাতে ব্যবহৃত হয় যার মধ্যে কিছু ঘটার কথা ছিল।</p><br><p><b>অপশন (a) at:</b> <b>'at now'</b> ভুল ব্যবহার।</p><br><p><b>অপশন (b) in:</b> <b>'in now'</b> ভুল ব্যবহার।</p><br><p><b>অপশন (d) over:</b> <b>'over now'</b> ভুল ব্যবহার।</p>",
+        },
+        {
+          id: 44,
+          question:
+            "The Pakistan rulers used weapons _ us instead of defending us from external enemies.",
+          options: {
+            a: "in",
+            b: "by",
+            c: "at",
+            d: "on",
+          },
+          correct: "b",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(b) by</b>। এখানে <b>'by'</b> দ্বারা <b>'দ্বারা'</b> বা <b>'মাধ্যম'</b> বোঝানো হয়েছে। পাকিস্তানি শাসকরা আমাদের উপর <b>অস্ত্র ব্যবহার করে</b>, যার ফলে আমরা রক্ষা পাইনি।</p><br><p><b>অপশন (a) in:</b> <b>'in us'</b> ভুল ব্যবহার।</p><br><p><b>অপশন (c) at:</b> <b>'at us'</b> সাধারণত লক্ষ্যবস্তু বোঝায়, যেমন: <b>'shoot at us'</b>।</p><br><p><b>অপশন (d) on:</b> <b>'on us'</b> কিছু চাপানো বা প্রয়োগ করা বোঝাতে ব্যবহৃত হতে পারে, তবে এখানে <b>'by'</b> এর অর্থ আরো শক্তিশালী।</p>",
+        },
+        {
+          id: 45,
+          question: "What is the time _ your watch?",
+          options: {
+            a: "by",
+            b: "in",
+            c: "of",
+            d: "for",
+          },
+          correct: "a",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(a) by</b>। ঘড়িতে সময় কত জানতে <b>'by' preposition</b> ব্যবহৃত হয়। এটি নির্দেশ করে যে সময়টি ঘড়ি দ্বারা দেখানো হচ্ছে। যেমন: <b>'What time is it by your watch?'</b></p><br><p><b>অপশন (b) in:</b> <b>'in your watch'</b> ভুল ব্যবহার।</p><br><p><b>অপশন (c) of:</b> <b>'of your watch'</b> ভুল ব্যবহার।</p><br><p><b>অপশন (d) for:</b> <b>'for your watch'</b> ভুল ব্যবহার।</p>",
+        },
+        {
+          id: 46,
+          question: "They reached the airport _",
+          options: {
+            a: "at, by",
+            b: "by, on",
+            c: "in, on",
+            d: "on, by",
+          },
+          correct: "a",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(a) at, by</b>। বাক্যটিতে দুটি শূন্যস্থান আছে, যা সম্ভবত যাতায়াতের মাধ্যম এবং স্থান বোঝানোর জন্য। সঠিক উত্তর হবে: <b>They reached the airport <u>at</u> (a specific time) <u>by</u> (a mode of transport)</b>. যেহেতু বাক্যে শুধুমাত্র একটি শূন্যস্থান রয়েছে, এবং অপশনগুলোতে দুটি করে <b>preposition</b> আছে, এটি নির্দেশ করে যে প্রশ্নটি অসম্পূর্ণ বা অপশনগুলো ভুলভাবে বিন্যস্ত হয়েছে। তবে, প্রদত্ত অপশনগুলোর মধ্যে সবচেয়ে উপযুক্ত সংমিশ্রণ (যদি দুটি শূন্যস্থান থাকে) হলো <b>'at'</b> (নির্দিষ্ট স্থান বোঝাতে) এবং <b>'by'</b> (যাতায়াতের মাধ্যম বোঝাতে)। যদি প্রশ্নটি এমন হতো 'They reached the airport __ a specific time __ bus', তাহলে 'at' এবং 'by' সঠিক হতো। যেহেতু প্রশ্নটি অসম্পূর্ণ, এই উত্তরটি অপশনের প্রথম অংশকে সঠিক ধরে এবং দ্বিতীয় অংশকে ব্যাখ্যা হিসেবে দিয়েছে।</p>",
+        },
+        {
+          id: 47,
+          question: "Rabi comes to work _ 10'clock _ bus.",
+          options: {
+            a: "at, into",
+            b: "at, in",
+            c: "beside, next to",
+            d: "by, on",
+          },
+          correct: "d",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(d) by, on</b>। প্রথম শূন্যস্থানে <b>'by'</b> বসবে, কারণ <b>'by 10 o'clock'</b> মানে <b>'10টা বাজার মধ্যে'</b>। দ্বিতীয় শূন্যস্থানে <b>'on'</b> বসবে, কারণ গণপরিবহনের ক্ষেত্রে <b>'on bus'</b> বা <b>'on the bus'</b> ব্যবহৃত হয় (যেমন: <b>on a bus, on a train, on a plane</b>)।</p><br><p><b>অপশন (a) at, into:</b> <b>'at 10 o'clock'</b> সঠিক হলেও, <b>'into bus'</b> ভুল ব্যবহার।</p><br><p><b>অপশন (b) at, in:</b> <b>'at 10 o'clock'</b> সঠিক হলেও, <b>'in bus'</b> ভুল ব্যবহার।</p><br><p><b>অপশন (c) beside, next to:</b> এই <b>preposition</b> গুলো স্থান বোঝাতে ব্যবহৃত হয়, সময় বা যাতায়াতের মাধ্যম বোঝাতে নয়।</p>",
+        },
+        {
+          id: 48,
+          question: "Many poor people live _ the island.",
+          options: {
+            a: "across",
+            b: "on",
+            c: "in",
+            d: "at",
+          },
+          correct: "b",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(b) on</b>। কোনো দ্বীপের <b>'উপরে'</b> বসবাস করা বোঝাতে <b>'on' preposition</b> ব্যবহৃত হয়। যেমন: <b>'live on an island'</b>।</p><br><p><b>অপশন (a) across:</b> <b>'across'</b> মানে <b>'এক প্রান্ত থেকে অন্য প্রান্ত পর্যন্ত'</b>।</p><br><p><b>অপশন (c) in:</b> <b>'in'</b> সাধারণত একটি ভূখণ্ড বা দেশের মধ্যে বোঝাতে ব্যবহৃত হয়, কিন্তু দ্বীপের ক্ষেত্রে <b>'on'</b> বেশি উপযুক্ত।</p><br><p><b>অপশন (d) at:</b> <b>'at'</b> নির্দিষ্ট ছোট স্থান বোঝাতে ব্যবহৃত হয়।</p>",
+        },
+        {
+          id: 49,
+          question:
+            "I told him that he could not hope to catch a big fish _ a small rod like that, but he insisted _ trying.",
+          options: {
+            a: "with, on",
+            b: "by, about",
+            c: "with, about",
+            d: "by, on",
+          },
+          correct: "a",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(a) with, on</b>। বাক্যটির সঠিক রূপ হলো <b>'I told him that he could not hope to catch a big fish <u>with</u> a small rod like that, but he insisted <u>on</u> trying.'</b></p><br><p>প্রথম শূন্যস্থানে <b>'with'</b> বসবে, কারণ একটি যন্ত্র বা সরঞ্জাম ব্যবহার করে কিছু করা বোঝাতে <b>'with'</b> ব্যবহৃত হয় (with a rod)।</p><br><p>দ্বিতীয় শূন্যস্থানে <b>'on'</b> বসবে, কারণ <b>'insist on'</b> একটি <b>phrasal verb</b>, যার অর্থ <b>'কোনো কিছু করার জন্য জোর দেওয়া'</b>।</p>",
+        },
+        {
+          id: 50,
+          question:
+            "Fill in the gap with appropriate preposition. The writer describes the lady's lavish eating _ his expense.",
+          options: {
+            a: "at",
+            b: "on",
+            c: "by",
+            d: "with",
+          },
+          correct: "c",
+          explanation:
+            "<p>সঠিক উত্তরটি হলো <b>(c) by</b>। <b>'at his expense'</b> (তার খরচে) বা <b>'on his expense'</b> (তার খরচে) উভয়ই ব্যবহৃত হতে পারে, তবে এখানে <b>'by his expense'</b> বাক্যটি নির্দেশ করে যে লেখক তার খরচের বর্ণনা দিচ্ছেন। তবে, প্রচলিত ব্যবহার <b>'at his expense'</b> বা <b>'at someone's expense'</b>। যেহেতু প্রদত্ত অপশনগুলোতে <b>'at'</b> এবং <b>'on'</b> উভয়ই রয়েছে, এবং <b>'by'</b> একটি অপ্রচলিত ব্যবহার, এই প্রশ্নটির উত্তরটি বিতর্কিত হতে পারে। তবে, যদি 'by' কেই সঠিক ধরা হয়, তবে এটি তার ব্যয়ের মাধ্যমে বা তার হিসাব অনুযায়ী বোঝায়। কিন্তু সাধারণত 'on' বা 'at' বেশি সঠিক। এখানে উত্তর (c) দেওয়া আছে, তাই সেই অনুযায়ী ব্যাখ্যা দেওয়া হল, যদিও এটি সবচেয়ে প্রচলিত ব্যবহার নয়।</p>",
+        }
+      ];
+
+      const totalQuestions = questions.length;
+      let timeLeft = Math.floor(totalQuestions / 2) * 60;
+      const timerElement = document.getElementById("timer");
+      let timerInterval;
+
+      function updateTimer() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        timerElement.innerText = `${toBengaliNumber(
+          minutes
+        )} মিনিট ${toBengaliNumber(seconds)} সেকেন্ড`;
+
+        if (timeLeft > 0) {
+          timeLeft--;
+        } else {
+          stopTimer();
+          confirmSubmit();
+        }
+      }
+
+      function startTimer() {
+        timerElement.innerText = `${toBengaliNumber(
+          Math.floor(timeLeft / 60)
+        )} মিনিট ${toBengaliNumber(timeLeft % 60)} সেকেন্ড`;
+        timerInterval = setInterval(updateTimer, 1000);
+      }
+
+      function stopTimer() {
+        clearInterval(timerInterval);
+      }
+
+      function toBengaliNumber(num) {
+        const bengaliDigits = [
+          "০",
+          "১",
+          "২",
+          "৩",
+          "৪",
+          "৫",
+          "৬",
+          "৭",
+          "৮",
+          "৯",
+        ];
+        return String(num).replace(/\d/g, (d) => bengaliDigits[d]);
+      }
+
+      function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+      }
+
+      function generateQuestions() {
+        const examContainer = document.querySelector("#exam");
+        examContainer.innerHTML = "";
+        const shuffledQuestions = shuffleArray([...questions]);
+        shuffledQuestions.forEach((question, index) => {
+          const questionDiv = document.createElement("div");
+          questionDiv.classList.add("question-container");
+          questionDiv.setAttribute("data-question", question.id);
+          questionDiv.setAttribute("data-correct", question.correct);
+
+          let optionsHTML = "";
+          for (let option in question.options) {
+            optionsHTML += `
+              <label class="option" data-option="${option}">
+                <div class="circle">${option}</div>
+                <span class="option-text">${question.options[option]}</span>
+              </label>
+            `;
+          }
+
+          const explanationHTML = question.explanation
+            ? `<div class="explanation-dropdown">
+                  <button class="explanation-btn">ব্যাখ্যা দেখো</button>
+                  <div class="explanation-content">
+                    <div class="explanation-label">ব্যাখ্যা:</div>
+                    ${question.explanation}
+                  </div>
+                </div>`
+            : "";
+
+          questionDiv.innerHTML = `
+              <p class="question-label">${index + 1}. ${question.question}</p>
+              <div class="options">
+                ${optionsHTML}
+              </div>
+              ${explanationHTML}
+            `;
+          examContainer.appendChild(questionDiv);
+        });
+
+        document.querySelectorAll(".question-container").forEach((container) => {
+          container.style.display = "block";
+        });
+
+        document.querySelectorAll(".option").forEach((option) => {
+          option.addEventListener(
+            "click",
+            function (e) {
+              e.preventDefault();
+              const parent = this.closest(".question-container");
+              if (parent.classList.contains("locked")) return;
+              parent.classList.add("locked");
+              parent.querySelectorAll(".option").forEach((el) => {
+                if (el !== this) {
+                  el.style.pointerEvents = "none";
+                  el.style.cursor = "default";
+                }
+                el.classList.remove("selected");
+              });
+              this.classList.add("selected");
+            },
+            { once: true }
+          );
+        });
+
+        document.querySelectorAll(".explanation-btn").forEach((btn) => {
+          btn.addEventListener("click", function () {
+            const content = this.nextElementSibling;
+            content.classList.toggle("visible");
+            this.classList.toggle("active");
+          });
+        });
+
+        const examInfo = document.getElementById("exam-info");
+        if (examInfo) {
+          examInfo.innerText = `পূর্ণ নম্বরঃ ${toBengaliNumber(
+            totalQuestions
+          )}`;
+        }
+      }
+
+      function initializeChart() {
+        const ctx = document.getElementById("scoreChart").getContext("2d");
+        chartInstance = new Chart(ctx, {
+          type: "pie",
+          data: {
+            labels: ["ঠিক উত্তর", "ভুল উত্তর", "অনুত্তরিত"],
+            datasets: [
+              {
+                data: [0, 0, 0],
+                backgroundColor: ["#34c759", "#ff3b30", "#007aff"],
+                borderColor: "#fff",
+                borderWidth: 2,
+                hoverOffset: 10,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "10%",
+            layout: {
+              padding: 10,
+            },
+            plugins: {
+              legend: {
+                position: "bottom",
+                labels: {
+                  font: {
+                    family: '"Hind Siliguri", sans-serif',
+                    size: 13,
+                    weight: "bold",
+                  },
+                  color: "#333",
+                  padding: 12,
+                  boxWidth: 14,
+                  generateLabels: (chart) => {
+                    const data = chart.data;
+                    return data.labels.map((label, i) => ({
+                      text: label,
+                      font: {
+                        family: '"Hind Siliguri", sans-serif',
+                      },
+                      fillStyle: data.datasets[0].backgroundColor[i],
+                      hidden: !chart.getDataVisibility(i),
+                      index: i,
+                    }));
+                  },
+                },
+              },
+              tooltip: {
+                backgroundColor: "rgba(0, 0, 0, 0.9)",
+                cornerRadius: 6,
+                titleFont: {
+                  family: '"Hind Siliguri", sans-serif',
+                  size: 14,
+                  weight: "bold",
+                },
+                bodyFont: {
+                  family: '"Hind Siliguri", sans-serif',
+                  size: 13,
+                },
+                padding: 10,
+                boxPadding: 5,
+              },
+            },
+            animation: {
+              animateScale: true,
+              animateRotate: true,
+              duration: 1000,
+              easing: "easeOutQuart",
+            },
+            elements: {
+              arc: {
+                borderRadius: 8,
+              },
+            },
+            onClick: (e, elements) => {
+              if (elements.length > 0) {
+                const index = elements[0].index;
+                const filter = ["correct", "wrong", "unanswered"][index];
+                filterQuestions(filter);
+              } else {
+                filterQuestions("all");
+              }
+            },
+          },
+        });
+      }
+
+      function filterQuestions(type) {
+        document.querySelectorAll(".question-container").forEach((question) => {
+          const status = question.getAttribute("data-status");
+          if (type === "all" || status === type) {
+            question.style.display = "block";
+          } else {
+            question.style.display = "none";
+          }
+        });
+      }
+
+      function showConfirmPopup() {
+        document.getElementById("confirmPopup").style.display = "block";
+      }
+
+      function confirmSubmit() {
+        document.getElementById("confirmPopup").style.display = "none";
+        stopTimer();
+        let score = 0,
+          answered = 0,
+          correct = 0,
+          wrong = 0,
+          unanswered = 0;
+
+        document
+          .querySelectorAll(".question-container")
+          .forEach((question, index) => {
+            let correctAnswer = question.getAttribute("data-correct");
+            let selectedOption = question.querySelector(".option.selected");
+
+            if (selectedOption) {
+              answered++;
+              let chosenAnswer = selectedOption.getAttribute("data-option");
+              if (chosenAnswer === correctAnswer) {
+                selectedOption
+                  .querySelector(".option-text")
+                  .classList.add("correct-text");
+                score += 1;
+                correct++;
+                question.setAttribute("data-status", "correct");
+              } else {
+                selectedOption
+                  .querySelector(".option-text")
+                  .classList.add("incorrect-text");
+                question
+                  .querySelector(`[data-option="${correctAnswer}"] .option-text`)
+                  .classList.add("correct-text");
+                score -= 0.25;
+                wrong++;
+                question.setAttribute("data-status", "wrong");
+              }
+            } else {
+              question
+                .querySelector(`[data-option="${correctAnswer}"] .option-text`)
+                .classList.add("unattempted-text");
+              unanswered++;
+              question.setAttribute("data-status", "unanswered");
+            }
+            question.style.display = "block";
+
+            const explanationDropdown = question.querySelector(
+              ".explanation-dropdown"
+            );
+            if (explanationDropdown) {
+              explanationDropdown.classList.add("visible");
+            }
+          });
+
+        const chartContainer = document.querySelector(".chart-container");
+        chartContainer.classList.add("visible");
+        if (!chartInstance) {
+          initializeChart();
+        }
+        chartInstance.data.datasets[0].data = [correct, wrong, unanswered];
+        chartInstance.update();
+
+        document.getElementById("totalQuestions").innerText =
+          toBengaliNumber(totalQuestions);
+        document.getElementById("answered").innerText = toBengaliNumber(answered);
+        document.getElementById("correctAnswers").innerText =
+          toBengaliNumber(correct);
+        document.getElementById("wrongAnswers").innerText = toBengaliNumber(wrong);
+        document.getElementById("unanswered").innerText =
+          toBengaliNumber(unanswered);
+        document.getElementById("finalScore").innerText = toBengaliNumber(
+          score.toFixed(2)
+        );
+        document.getElementById("popupSerial").innerText = serialNumber;
+
+        document.getElementById("formSerialNumber").value = serialNumber;
+        document.getElementById("formFinalScore").value = score.toFixed(2);
+        document.getElementById("formCorrectAnswers").value = correct;
+        document.getElementById("formWrongAnswers").value = wrong;
+        document.getElementById("formUnanswered").value = unanswered;
+        document.getElementById("formSubmissionTime").value =
+          new Date().toISOString();
+        document.querySelector("#scoreForm input[name='actionType']").value =
+          "exam_submit";
+
+        document.getElementById("submitBtn").style.display = "none";
+        document.getElementById("scorePopup").style.display = "block";
+      }
+
+      function cancelSubmit() {
+        document.getElementById("confirmPopup").style.display = "none";
+      }
+
+      function showErrorPopup() {
+        document.getElementById("errorPopup").style.display = "block";
+      }
+
+      function closeErrorPopup() {
+        document.getElementById("errorPopup").style.display = "none";
+      }
+
+      document
+        .getElementById("scoreForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+          const form = this;
+          const formData = new FormData(form);
+          const url = form.action;
+
+          // Send data in the background using fetch
+          fetch(url, {
+            method: "POST",
+            body: formData,
+            headers: {
+              Accept: "application/json",
+            },
+          })
+            .then((response) => {
+              if (response.ok) {
+                console.log("Form submitted successfully");
+              } else {
+                console.error("Form submission failed:", response.statusText);
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+
+          closePopup();
+        });
+
+      function closePopup() {
+        const scorePopup = document.getElementById("scorePopup");
+        scorePopup.classList.add("slide-out");
+        setTimeout(() => {
+          scorePopup.style.display = "none";
+          scorePopup.classList.remove("slide-out");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }, 500);
+      }
+    </script>
+  </body>
+</html>
