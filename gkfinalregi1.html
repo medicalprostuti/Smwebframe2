@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SM GKE Free Exam Batch-2025</title>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'hind siliguri', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #74b9ff, #0056b3);
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow: auto;
+        }
+
+        h1 {
+            font-size: 2.2em;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        p.subtitle {
+            font-size: 1.1em;
+            margin-bottom: 30px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .search-container {
+            width: 100%;
+            max-width: 350px; /* Smaller max-width */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        input[type="text"] {
+            width: 80%;
+            padding: 12px; /* Smaller padding */
+            font-size: 1.1em; /* Smaller font size */
+            border: none;
+            border-radius: 6px; /* Smaller border radius */
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #333;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        button {
+            width: 30%;
+            padding: 12px; /* Smaller padding */
+            font-size: 1.1em; /* Smaller font size */
+            margin-top: 20px; /* Decent distance */
+            border: none;
+            border-radius: 6px; /* Smaller border radius */
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+
+        #result-container {
+            width: 100%;
+            max-width: 400px; /* Smaller max-width */
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 25px; /* Smaller padding */
+            border-radius: 8px; /* Smaller border radius */
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            color: #333;
+            margin-top: 20px;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            box-sizing: border-box;
+        }
+        
+        #result-container.show {
+            opacity: 1;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 8px 0; /* Smaller padding */
+            border-bottom: 1px dashed #ccc;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 700;
+            color: #555;
+            flex-basis: 40%;
+            text-align: left;
+        }
+
+        .info-value {
+            font-weight: 400;
+            flex-basis: 60%;
+            text-align: right;
+            word-break: break-word; /* Prevents overflow */
+        }
+
+        .serial-number {
+            font-size: 1.4em; /* Smaller font size */
+            font-weight: 700;
+            color: #e74c3c;
+            margin-top: 15px; /* Smaller margin */
+            padding-top: 8px; /* Smaller padding */
+            border-top: 2px solid #e74c3c;
+            width: 100%;
+        }
+
+        .error {
+            color: #e74c3c;
+            font-weight: 700;
+            font-size: 1.1em;
+            text-shadow: none;
+        }
+
+        .initial-message {
+            color: #888;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            p.subtitle {
+                font-size: 0.9em;
+            }
+            .info-row {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 5px 0;
+            }
+            .info-label {
+                text-align: left;
+                margin-bottom: 5px;
+            }
+            .info-value {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>SM GKE <br> Free Exam Batch-2025</h1>
+    <p class="subtitle">HSC Roll search করে দেখো তোমার সিরিয়াল নম্বর!</p>
+
+    <div class="search-container">
+        <input type="text" id="hscRollInput" placeholder="HSC Roll Number">
+        <button onclick="searchRoll()">Search</button>
+    </div>
+
+    <div id="result-container">
+        <p class="initial-message">Search result will appear here.</p>
+    </div>
+
+    <script>
+        const students = [
+            {"name": "Mst. Shila Akter", "roll": "146523", "phone": "01793747679", "serial": "31162"},
+            {"name": "Marium", "roll": "115599", "phone": "01339222959", "serial": "81935"},
+            {"name": "Sabrina Binto Salam Sania", "roll": "129849", "phone": "01871567456", "serial": "84734"},
+            {"name": "Musfik", "roll": "303014", "phone": "01932553036", "serial": "61955"},
+            {"name": "Ananya sarker", "roll": "159202", "phone": "01973789330", "serial": "75997"},
+            {"name": "শাওন", "roll": "132002", "phone": "01873234763", "serial": "78255"},
+            {"name": "ABM.Siddik", "roll": "233991", "phone": "01304515104", "serial": "86596"},
+            {"name": "তাসনুবা আহমেদ", "roll": "111754", "phone": "01839141557", "serial": "91710"},
+            {"name": "Amina Ahmed Opu", "roll": "101649", "phone": "01303453624", "serial": "49902"},
+            {"name": "Manik", "roll": "239183", "phone": "01613913252", "serial": "94441"},
+            {"name": "Fatema Tabassum", "roll": "135544", "phone": "01724003193", "serial": "72541"},
+            {"name": "Meherun Akter Sayma", "roll": "172490", "phone": "01609272061", "serial": "65849"},
+            {"name": "Ishraka Faiza Ali", "roll": "120809", "phone": "01905261540", "serial": "76935"},
+            {"name": "Rahimul islam Rahi", "roll": "207671", "phone": "01823397429", "serial": "22825"},
+            {"name": "নিলয় রায়", "roll": "105071", "phone": "01896491811", "serial": "13756"},
+            {"name": "IBRAHIM KHALILULLAH", "roll": "233841", "phone": "01938434685", "serial": "57613"},
+            {"name": "Nusrat Jahan", "roll": "106274", "phone": "01860936911", "serial": "86246"},
+            {"name": "Farjana Akter", "roll": "165080", "phone": "01846396044", "serial": "33097"},
+            {"name": "Israt Jahan", "roll": "195367", "phone": "01324578484", "serial": "19116"},
+            {"name": "Fairuj Tabassum Naba", "roll": "142783", "phone": "01791746105", "serial": "43382"},
+            {"name": "Mim Sakin", "roll": "173611", "phone": "01831402197", "serial": "91122"},
+            {"name": "Mahfuz", "roll": "250447", "phone": "01844323411", "serial": "79326"},
+            {"name": "Shamim Ahmed", "roll": "111534", "phone": "01772532240", "serial": "85634"},
+            {"name": "Mim islam", "roll": "279862", "phone": "01795622908", "serial": "12475"},
+            {"name": "MD AS IF", "roll": "268116", "phone": "01310425100", "serial": "71694"},
+            {"name": "ইমরান", "roll": "105030", "phone": "01580334700", "serial": "86074"},
+            {"name": "রাফিয়া নৌশিন এমেলি", "roll": "212065", "phone": "01302301383", "serial": "25344"},
+            {"name": "Mehedi Hasan Rokon", "roll": "520741", "phone": "01747641787", "serial": "68884"},
+            {"name": "Muslima Jannat Nishi", "roll": "137103", "phone": "01797852989", "serial": "60830"},
+            {"name": "Mahfuz Rahman", "roll": "205848", "phone": "01826845028", "serial": "49991"},
+            {"name": "Mohiuddin Fahad", "roll": "122365", "phone": "01858690127", "serial": "29070"},
+            {"name": "Alima Siddeka Shorme", "roll": "148824", "phone": "01753148018", "serial": "76247"},
+            {"name": "Maisha Tasnia", "roll": "137039", "phone": "01774254703", "serial": "37496"},
+            {"name": "Faika Malyat", "roll": "105377", "phone": "01715388817", "serial": "70460"},
+            {"name": "Fahmida Bristy", "roll": "228557", "phone": "01606359307", "serial": "28740"},
+            {"name": "Sabia hasna shefa", "roll": "506323", "phone": "01812009539", "serial": "67125"},
+            {"name": "Ovi Farazi", "roll": "102560", "phone": "01938148138", "serial": "12040"},
+            {"name": "Jarin Tasnim", "roll": "111372", "phone": "01966741427", "serial": "45365"},
+            {"name": "Jarif Hossain", "roll": "152226", "phone": "01818785859", "serial": "23658"},
+            {"name": "Arifur Rahman", "roll": "160616", "phone": "01724087967", "serial": "23706"},
+            {"name": "Anjuman", "roll": "107948", "phone": "01902709087", "serial": "74561"},
+            {"name": "Alif", "roll": "102296", "phone": "01616962594", "serial": "84426"},
+            {"name": "Mim", "roll": "151913", "phone": "01905651309", "serial": "97232"},
+            {"name": "Mishuari Sultana Mim", "roll": "207927", "phone": "01970423990", "serial": "79673"},
+            {"name": "Pranti", "roll": "256094", "phone": "01719869578", "serial": "47084"},
+            {"name": "MD.ALINUR", "roll": "114608", "phone": "01741594035", "serial": "85024"},
+            {"name": "Riam", "roll": "203321", "phone": "01968864608", "serial": "86373"},
+            {"name": "সাদিয়া রহমান", "roll": "114326", "phone": "01867279948", "serial": "63069"},
+            {"name": "Tahera", "roll": "126141", "phone": "01533567399", "serial": "19821"},
+            {"name": "Md.Siyam", "roll": "172702", "phone": "01916292832", "serial": "67928"},
+            {"name": "Maria", "roll": "132798", "phone": "01575015651", "serial": "16540"},
+            {"name": "Jerin Tasrin", "roll": "128586", "phone": "01946080786", "serial": "58444"},
+            {"name": "Onima sultana", "roll": "278422", "phone": "01734159426", "serial": "73204"},
+            {"name": "Kanika", "roll": "465222", "phone": "01936093192", "serial": "45539"},
+            {"name": "MD ASHRAFUL ISLAM", "roll": "100371", "phone": "01956008615", "serial": "80009"},
+            {"name": "Md Shahed Alam", "roll": "105055", "phone": "01776559375", "serial": "40212"},
+            {"name": "Fariha Tabassum", "roll": "101669", "phone": "01682668543", "serial": "91099"},
+            {"name": "Anika Akter", "roll": "500550", "phone": "01309689049", "serial": "87116"},
+            {"name": "Ashiqur Rahman", "roll": "117691", "phone": "01921692724", "serial": "61627"},
+            {"name": "Sorna saha", "roll": "164974", "phone": "01922823104", "serial": "26612"},
+            {"name": "Most.Ishita Pervin Shohali", "roll": "100299", "phone": "01795780506", "serial": "94674"},
+            {"name": "Nondita Roy Nodee", "roll": "104218", "phone": "01861610245", "serial": "53603"},
+            {"name": "Sanjida", "roll": "155151", "phone": "01755282845", "serial": "78205"},
+            {"name": "Arjuman Ara Esha", "roll": "122283", "phone": "01706031400", "serial": "13903"},
+            {"name": "Shipa", "roll": "101429", "phone": "01301311217", "serial": "49754"},
+            {"name": "Nujhat Abedin", "roll": "103824", "phone": "01946328377", "serial": "62574"},
+            {"name": "Farah Tartusi Islam Tasfi", "roll": "108086", "phone": "01833973944", "serial": "54134"},
+            {"name": "MD.TOUFIKUL KABIR KANOK", "roll": "115956", "phone": "01650222526", "serial": "44340"},
+            {"name": "Tasnim Mahmud Toaha", "roll": "114999", "phone": "01761127906", "serial": "23652"},
+            {"name": "Baset Rihan", "roll": "133912", "phone": "01782538368", "serial": "43747"},
+            {"name": "Rukaiya Rakhi", "roll": "122844", "phone": "01320426083", "serial": "61974"},
+            {"name": "Hamidur Rahman Himel", "roll": "129779", "phone": "01876841994", "serial": "86278"},
+            {"name": "Anika", "roll": "218504", "phone": "01916242143", "serial": "75313"},
+            {"name": "শ্রেষ্ঠা", "roll": "169154", "phone": "01618838118", "serial": "92965"},
+            {"name": "Chandni", "roll": "126069", "phone": "01729607091", "serial": "26999"},
+            {"name": "Sumaya Akter Mim", "roll": "109320", "phone": "01613159904", "serial": "97872"},
+            {"name": "Chandan Howldaer", "roll": "100361", "phone": "01622792883", "serial": "61075"},
+            {"name": "Sadia Hossain Megha", "roll": "183618", "phone": "01848153059", "serial": "72644"},
+            {"name": "Sajuti", "roll": "163483", "phone": "01841984850", "serial": "94875"},
+            {"name": "Nusrat Jahan Ima", "roll": "189944", "phone": "01314568315", "serial": "50505"},
+            {"name": "Sabrina Tasnim", "roll": "163754", "phone": "01796769942", "serial": "39523"},
+            {"name": "Shanta", "roll": "214514", "phone": "01763188832", "serial": "96638"},
+            {"name": "Shimu akter", "roll": "120334", "phone": "01540139823", "serial": "84805"},
+            {"name": "Shaidul", "roll": "107845", "phone": "01966902662", "serial": "39100"},
+            {"name": "Jabin Tasmin farha", "roll": "108908", "phone": "01712864632", "serial": "67550"},
+            {"name": "Md.Rakibul Islam", "roll": "121879", "phone": "01577156478", "serial": "99519"},
+            {"name": "Salma", "roll": "136165", "phone": "01780321707", "serial": "41675"},
+            {"name": "Sumaya Akther", "roll": "105813", "phone": "01965829554", "serial": "65484"},
+            {"name": "Md Asif Islam", "roll": "209963", "phone": "01751234968", "serial": "51589"},
+            {"name": "Asraful Islam", "roll": "118161", "phone": "01621752000", "serial": "26801"},
+            {"name": "Fahim Akter", "roll": "112276", "phone": "01400931452", "serial": "85519"},
+            {"name": "Shoheba jennat emu", "roll": "141416", "phone": "01812890263", "serial": "66091"},
+            {"name": "Ashfiya Jannat Aroya", "roll": "169243", "phone": "01993497182", "serial": "10150"},
+            {"name": "মো মনীম হাসান", "roll": "149758", "phone": "01327915811", "serial": "13835"},
+            {"name": "Sadia Jannat", "roll": "105699", "phone": "01985474762", "serial": "40174"},
+            {"name": "Shumi", "roll": "121942", "phone": "01756794970", "serial": "79887"},
+            {"name": "Mohammad", "roll": "113797", "phone": "01825274961", "serial": "45254"},
+            {"name": "Ovejit das", "roll": "615492", "phone": "01308002598", "serial": "28794"},
+            {"name": "ওয়াকিয়া সুলতানা", "roll": "113492", "phone": "01314306972", "serial": "59767"},
+            {"name": "সৃজন সাহা", "roll": "500422", "phone": "01735386125", "serial": "31277"},
+            {"name": "Rehan", "roll": "193575", "phone": "01981404606", "serial": "74318"},
+            {"name": "Shimul", "roll": "156545", "phone": "01847726152", "serial": "86150"},
+            {"name": "MD Shakib Uddin Ripat", "roll": "424993", "phone": "01813762154", "serial": "17465"},
+            {"name": "Lam Iya Naina", "roll": "117568", "phone": "01902957516", "serial": "31950"},
+            {"name": "Prionty", "roll": "146389", "phone": "01325350850", "serial": "49683"},
+            {"name": "Abid", "roll": "100601", "phone": "01609037448", "serial": "31760"},
+            {"name": "Asim Faiyaz", "roll": "129134", "phone": "01747085373", "serial": "50767"},
+            {"name": "Asrafi", "roll": "667755", "phone": "01609868221", "serial": "29929"},
+            {"name": "sumaiya", "roll": "134551", "phone": "01847791762", "serial": "78579"},
+            {"name": "Sneha Paik", "roll": "502625", "phone": "01625080830", "serial": "80711"},
+            {"name": "Siam", "roll": "120591", "phone": "01309729709", "serial": "67953"},
+            {"name": "Neha", "roll": "140396", "phone": "01725182277", "serial": "44570"},
+            {"name": "Mahfuz Rahman", "roll": "274110", "phone": "01826845028", "serial": "52781"},
+            {"name": "Prome", "roll": "140447", "phone": "01806933996", "serial": "30849"},
+            {"name": "Samia", "roll": "121303", "phone": "01815477821", "serial": "62414"},
+            {"name": "Fatema Akter", "roll": "100875", "phone": "01831385681", "serial": "17156"},
+            {"name": "Sadiya Aktar Lima", "roll": "225630", "phone": "01950167041", "serial": "42647"},
+            {"name": "MD Moznu chowdhry Muznu", "roll": "441297", "phone": "01618689861", "serial": "11600"},
+            {"name": "Sadia Tasnim Oishi", "roll": "158609", "phone": "01629792836", "serial": "27328"},
+            {"name": "Istiaque Ahmed", "roll": "150944", "phone": "01907289221", "serial": "74153"},
+            {"name": "Mst shamima tasnim", "roll": "128583", "phone": "01327205069", "serial": "99860"},
+            {"name": "Rahad", "roll": "159824", "phone": "01940605090", "serial": "91526"},
+            {"name": "Kanij Fatema Mim", "roll": "141782", "phone": "01334012687", "serial": "27447"},
+            {"name": "Md Atik Hasan", "roll": "220193", "phone": "01744541957", "serial": "54615"},
+            {"name": "Maria", "roll": "162049", "phone": "01751615498", "serial": "91333"},
+            {"name": "Kamrun nesa", "roll": "140162", "phone": "01314231269", "serial": "66530"},
+            {"name": "MD MAHAMUDUL HASAN", "roll": "322064", "phone": "01340383085", "serial": "17823"},
+            {"name": "Maliha", "roll": "141311", "phone": "01720252405", "serial": "76757"},
+            {"name": "Md. Habibur Rahman", "roll": "146743", "phone": "01613949097", "serial": "95367"},
+            {"name": "Muhammadullah", "roll": "300538", "phone": "01735756976", "serial": "76874"},
+            {"name": "Masuma Ahmed", "roll": "111852", "phone": "01638363577", "serial": "14338"},
+            {"name": "Sams Arefin Shaon", "roll": "103513", "phone": "01974850618", "serial": "18431"},
+            {"name": "Nadia Noor", "roll": "104049", "phone": "01772386111", "serial": "25567"},
+            {"name": "MD Mizanur Rahman", "roll": "111771", "phone": "01798348664", "serial": "85137"},
+            {"name": "Kamrunnahar Effat", "roll": "140163", "phone": "01314231269", "serial": "74797"},
+            {"name": "Sayra", "roll": "494121", "phone": "01576756156", "serial": "89136"},
+            {"name": "Rifa Tamanna", "roll": "149363", "phone": "01343602276", "serial": "97027"},
+            {"name": "shila akter", "roll": "156615", "phone": "01924242151", "serial": "24125"},
+            {"name": "Mafi", "roll": "160865", "phone": "01315710652", "serial": "70515"},
+            {"name": "Juneya", "roll": "803728", "phone": "01722892475", "serial": "24506"},
+            {"name": "Tania", "roll": "139875", "phone": "01614279083", "serial": "98432"},
+            {"name": "Jerin", "roll": "215330", "phone": "01995643240", "serial": "66055"},
+            {"name": "Retha Akhter", "roll": "135249", "phone": "01903777575", "serial": "73219"},
+            {"name": "Mohona", "roll": "134194", "phone": "01309412703", "serial": "21834"},
+            {"name": "Sheikh Ajim", "roll": "126039", "phone": "01979624619", "serial": "78796"},
+            {"name": "TonnyAkter", "roll": "178197", "phone": "01621427197", "serial": "55232"},
+            {"name": "Shuvro", "roll": "241310", "phone": "01767826994", "serial": "61498"},
+            {"name": "michael prottoy", "roll": "516827", "phone": "01326472590", "serial": "44058"},
+            {"name": "MD. MILON MIAH", "roll": "221616", "phone": "01576507408", "serial": "19297"},
+            {"name": "Ashikur Rahman", "roll": "129162", "phone": "01851454272", "serial": "62176"},
+            {"name": "sanjida Afreen", "roll": "132784", "phone": "01841848077", "serial": "60921"},
+            {"name": "Samiha", "roll": "114003", "phone": "01872594154", "serial": "53567"},
+            {"name": "Md.Abdur Rakib", "roll": "129167", "phone": "01619902864", "serial": "64197"},
+            {"name": "Esra", "roll": "111931", "phone": "01705638736", "serial": "60052"},
+            {"name": "ফজিলাতুন্নেছা খান মুগ্ধ", "roll": "156762", "phone": "01612479490", "serial": "38586"},
+            {"name": "Tasnia Rashid Lisha", "roll": "149362", "phone": "01882851120", "serial": "53773"},
+            {"name": "Imtiaz Sarker Rafi", "roll": "217637", "phone": "01860608017", "serial": "25734"},
+            {"name": "Osman goni", "roll": "135111", "phone": "01882459686", "serial": "95805"},
+            {"name": "Abdullah", "roll": "104799", "phone": "01747653044", "serial": "45978"},
+            {"name": "Mst shimla akter shimu", "roll": "102030", "phone": "01307974720", "serial": "31231"},
+            {"name": "Km Nayem", "roll": "263298", "phone": "01771411380", "serial": "14579"},
+            {"name": "Dipika Biswas Chaity", "roll": "106035", "phone": "01402763060", "serial": "84218"},
+            {"name": "Tajuddin Ahmed", "roll": "109341", "phone": "01805130289", "serial": "66365"},
+            {"name": "TASNIM HASAN JAYID", "roll": "150300", "phone": "01764746578", "serial": "73147"},
+            {"name": "Nabiha Mahmud", "roll": "175541", "phone": "01312346638", "serial": "89077"},
+            {"name": "Minhaj Ahmad", "roll": "119061", "phone": "01522132462", "serial": "90280"},
+            {"name": "MD Mahady Hasan Lipon", "roll": "200001", "phone": "01887891401", "serial": "99328"},
+            {"name": "Ekra Ahmed", "roll": "141667", "phone": "01753519186", "serial": "75025"},
+            {"name": "Tahmid Tanim", "roll": "129156", "phone": "01791736818", "serial": "78386"},
+            {"name": "Afsana akter borsha", "roll": "133509", "phone": "01701892264", "serial": "94895"},
+            {"name": "Daoud", "roll": "100040", "phone": "01995225528", "serial": "42669"},
+            {"name": "Mahbuba Shahrin Aorpona", "roll": "172526", "phone": "01986619027", "serial": "61781"},
+            {"name": "নুসরাত জাহান সুজানা", "roll": "242471", "phone": "01866660694", "serial": "30598"},
+            {"name": "Ummay jannatul ferdous", "roll": "211539", "phone": "01677126218", "serial": "90134"},
+            {"name": "Mehjabin", "roll": "109537", "phone": "01928382236", "serial": "74085"},
+            {"name": "Samiha Tasnim", "roll": "112233", "phone": "01731518833", "serial": "29504"},
+            {"name": "Abdur Rahman", "roll": "113483", "phone": "01328750104", "serial": "99350"},
+            {"name": "Md Foysal Ahmed", "roll": "123174", "phone": "01736004997", "serial": "77028"},
+            {"name": "Hussain khan", "roll": "193720", "phone": "01961219034", "serial": "84274"},
+            {"name": "Niloy Chakraborty", "roll": "111902", "phone": "01740971306", "serial": "43137"},
+            {"name": "Badhon Chakraborty", "roll": "110842", "phone": "01764995934", "serial": "78225"},
+            {"name": "Kanij Suborna", "roll": "148579", "phone": "01705758338", "serial": "72365"},
+            {"name": "Eftekhar Naeem", "roll": "152494", "phone": "01705278806", "serial": "12984"},
+            {"name": "MD REMON HOSEN", "roll": "432788", "phone": "01911984850", "serial": "65890"},
+            {"name": "Arpa Banik", "roll": "114462", "phone": "01735837956", "serial": "94658"},
+            {"name": "Humaira Binte Barik Jeba", "roll": "151703", "phone": "01932770907", "serial": "79663"},
+            {"name": "Husneara", "roll": "107383", "phone": "01785583398", "serial": "17442"},
+            {"name": "Marzahan Akther Shammi", "roll": "107057", "phone": "01767348342", "serial": "47871"},
+            {"name": "Farhana Jannat Esha", "roll": "193879", "phone": "01858253901", "serial": "62370"},
+            {"name": "Nusrat Jahan medha", "roll": "140160", "phone": "01759612431", "serial": "45853"},
+            {"name": "Jakia Afrin Jisa", "roll": "202275", "phone": "01948421979", "serial": "24021"},
+            {"name": "Shanjida Sammi", "roll": "202525", "phone": "01921581435", "serial": "86025"},
+            {"name": "Sakib", "roll": "120005", "phone": "01768451995", "serial": "29367"},
+            {"name": "Lisa", "roll": "159272", "phone": "01326026764", "serial": "88366"},
+            {"name": "SNR", "roll": "175373", "phone": "01961917614", "serial": "24275"},
+            {"name": "Sumaiya", "roll": "203485", "phone": "01327274957", "serial": "45470"},
+            {"name": "Md Naim Hassan Nobel", "roll": "122732", "phone": "01710521859", "serial": "33105"},
+            {"name": "Sabiha tasnimma", "roll": "103741", "phone": "01637889841", "serial": "81679"},
+            {"name": "Md Mahamudul Hasan", "roll": "148858", "phone": "01312581084", "serial": "41045"},
+            {"name": "Estiak Ahmed", "roll": "522395", "phone": "01822043321", "serial": "69840"},
+            {"name": "Jahidul Hasan", "roll": "202291", "phone": "01992740794", "serial": "71273"},
+            {"name": "Mir Hamida Nazar", "roll": "105358", "phone": "01841512310", "serial": "64945"},
+            {"name": "Antara Rani Sarkar", "roll": "100406", "phone": "01736244913", "serial": "35197"},
+            {"name": "Nuriya", "roll": "110380", "phone": "01712805086", "serial": "35166"},
+            {"name": "Samiha Musarrat Meem", "roll": "105574", "phone": "01820411651", "serial": "36448"}
+        ];
+
+        function searchRoll() {
+            const rollInput = document.getElementById('hscRollInput').value.trim();
+            const resultContainer = document.getElementById('result-container');
+            
+            resultContainer.classList.remove('show');
+            
+            setTimeout(() => {
+                resultContainer.innerHTML = '';
+                if (!rollInput) {
+                    resultContainer.innerHTML = '<p class="error">অনুগ্রহ করে HSC রোল নম্বর দিন।</p>';
+                    resultContainer.classList.add('show');
+                    return;
+                }
+
+                const student = students.find(s => s.roll === rollInput);
+
+                if (student) {
+                    resultContainer.innerHTML = `
+                        <div class="info-row">
+                            <span class="info-label">Name:</span>
+                            <span class="info-value">${student.name}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">HSC Roll:</span>
+                            <span class="info-value">${student.roll}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Phone:</span>
+                            <span class="info-value">${student.phone}</span>
+                        </div>
+                        <div class="serial-number">Serial No: ${student.serial}</div>
+                    `;
+                } else {
+                    resultContainer.innerHTML = '<p class="error">দুঃখিত! এই রোল নম্বরের কোনো তথ্য খুঁজে পাওয়া যায়নি।</p>';
+                }
+                resultContainer.classList.add('show');
+            }, 300);
+        }
+    </script>
+
+</body>
+</html>
