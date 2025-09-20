@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>প্রশ্ন ডেটা নির্মাতা</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Hind Siliguri', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .container {
+            max-width: 4xl;
+        }
+        .form-input, .form-textarea {
+            transition: all 0.2s ease-in-out;
+        }
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.4);
+            border-color: #4f46e5;
+        }
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 40;
+        }
+        .modal {
+            z-index: 50;
+        }
+        /* Mobile-first layout for form inputs */
+        .form-section-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem; /* Equivalent to gap-6 */
+        }
+        @media (min-width: 768px) {
+            .form-section-grid {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 sm:p-8 min-h-screen flex items-center justify-center">
+    <div class="container mx-auto bg-white rounded-xl shadow-lg p-6 md:p-10">
+        <h1 class="text-3xl md:text-4xl font-bold text-center mb-6 text-indigo-700">প্রশ্ন ডেটা নির্মাতা</h1>
+        
+        <!-- Input Form Section -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">নতুন প্রশ্ন যোগ করুন</h2>
+            <div class="form-section-grid">
+                <div class="col-span-2">
+                    <label for="question" class="block text-gray-700 font-medium mb-2">প্রশ্ন:</label>
+                    <textarea id="question" rows="3" class="form-textarea w-full p-3 border border-gray-300 rounded-lg"></textarea>
+                </div>
+                <div>
+                    <label for="optionA" class="block text-gray-700 font-medium mb-2">অপশন (a):</label>
+                    <input type="text" id="optionA" class="form-input w-full p-3 border border-gray-300 rounded-lg" placeholder="যেমন: কাইটিন">
+                </div>
+                <div>
+                    <label for="optionB" class="block text-gray-700 font-medium mb-2">অপশন (b):</label>
+                    <input type="text" id="optionB" class="form-input w-full p-3 border border-gray-300 rounded-lg" placeholder="যেমন: সেলুলোজ">
+                </div>
+                <div>
+                    <label for="optionC" class="block text-gray-700 font-medium mb-2">অপশন (c):</label>
+                    <input type="text" id="optionC" class="form-input w-full p-3 border border-gray-300 rounded-lg" placeholder="যেমন: গ্লাইকোজেন">
+                </div>
+                <div>
+                    <label for="optionD" class="block text-gray-700 font-medium mb-2">অপশন (d):</label>
+                    <input type="text" id="optionD" class="form-input w-full p-3 border border-gray-300 rounded-lg" placeholder="যেমন: শ্বেতসার">
+                </div>
+                <div class="col-span-2">
+                    <label for="correct" class="block text-gray-700 font-medium mb-2">সঠিক উত্তর (a, b, c, বা d):</label>
+                    <input type="text" id="correct" class="form-input w-full p-3 border border-gray-300 rounded-lg" placeholder="যেমন: a">
+                </div>
+                <div class="col-span-2">
+                    <label for="explanation" class="block text-gray-700 font-medium mb-2">ব্যাখ্যা:</label>
+                    <textarea id="explanation" rows="4" class="form-textarea w-full p-3 border border-gray-300 rounded-lg"></textarea>
+                </div>
+            </div>
+            <button id="addQuestionBtn" class="w-full mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-300">
+                প্রশ্ন যোগ করুন
+            </button>
+        </div>
+
+        <!-- Display Added Questions -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">যোগ করা প্রশ্নসমূহ (<span id="questionCount">0</span>)</h2>
+            <div id="questionsList" class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <p class="text-gray-500 text-center" id="emptyMessage">এখানে কোনো প্রশ্ন যোগ করা হয়নি।</p>
+            </div>
+        </div>
+
+        <!-- JSON Output Section -->
+        <div>
+            <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-0">তৈরি করা JSON ডেটা</h2>
+                <div class="flex gap-2">
+                    <button id="generateJsonBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-300">
+                        JSON তৈরি করুন
+                    </button>
+                    <button id="copyJsonBtn" class="bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-300" style="display:none;">
+                        JSON কপি করুন
+                    </button>
+                </div>
+            </div>
+            <pre id="outputJson" class="bg-gray-800 text-white p-6 rounded-lg overflow-x-auto text-sm" style="display:none;"></pre>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="fixed inset-0 hidden items-center justify-center p-4 modal-overlay">
+        <div class="bg-white rounded-xl shadow-lg p-6 md:p-8 w-full max-w-2xl transform scale-95 transition-transform duration-300 ease-in-out max-h-[90vh] overflow-y-auto">
+            <h2 class="text-2xl font-bold mb-4 text-indigo-700">প্রশ্ন এডিট করুন</h2>
+            <div class="form-section-grid">
+                <div class="col-span-2">
+                    <label for="editQuestion" class="block text-gray-700 font-medium mb-2">প্রশ্ন:</label>
+                    <textarea id="editQuestion" rows="3" class="form-textarea w-full p-3 border border-gray-300 rounded-lg"></textarea>
+                </div>
+                <div>
+                    <label for="editOptionA" class="block text-gray-700 font-medium mb-2">অপশন (a):</label>
+                    <input type="text" id="editOptionA" class="form-input w-full p-3 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label for="editOptionB" class="block text-gray-700 font-medium mb-2">অপশন (b):</label>
+                    <input type="text" id="editOptionB" class="form-input w-full p-3 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label for="editOptionC" class="block text-gray-700 font-medium mb-2">অপশন (c):</label>
+                    <input type="text" id="editOptionC" class="form-input w-full p-3 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label for="editOptionD" class="block text-gray-700 font-medium mb-2">অপশন (d):</label>
+                    <input type="text" id="editOptionD" class="form-input w-full p-3 border border-gray-300 rounded-lg">
+                </div>
+                <div class="col-span-2">
+                    <label for="editCorrect" class="block text-gray-700 font-medium mb-2">সঠিক উত্তর (a, b, c, বা d):</label>
+                    <input type="text" id="editCorrect" class="form-input w-full p-3 border border-gray-300 rounded-lg">
+                </div>
+                <div class="col-span-2">
+                    <label for="editExplanation" class="block text-gray-700 font-medium mb-2">ব্যাখ্যা:</label>
+                    <textarea id="editExplanation" rows="4" class="form-textarea w-full p-3 border border-gray-300 rounded-lg"></textarea>
+                </div>
+            </div>
+            <div class="flex justify-end gap-4 mt-6">
+                <button id="cancelEditBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-6 rounded-lg transition-all duration-300">
+                    বাতিল করুন
+                </button>
+                <button id="updateQuestionBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300">
+                    আপডেট প্রশ্ন
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questionData = [];
+        let nextId = 1;
+        let editingId = null;
+
+        const questionInput = document.getElementById('question');
+        const optionAInput = document.getElementById('optionA');
+        const optionBInput = document.getElementById('optionB');
+        const optionCInput = document.getElementById('optionC');
+        const optionDInput = document.getElementById('optionD');
+        const correctInput = document.getElementById('correct');
+        const explanationInput = document.getElementById('explanation');
+        const addQuestionBtn = document.getElementById('addQuestionBtn');
+        const generateJsonBtn = document.getElementById('generateJsonBtn');
+        const copyJsonBtn = document.getElementById('copyJsonBtn');
+        const questionsList = document.getElementById('questionsList');
+        const emptyMessage = document.getElementById('emptyMessage');
+        const questionCountSpan = document.getElementById('questionCount');
+        const outputJsonPre = document.getElementById('outputJson');
+        
+        // Modal elements
+        const editModal = document.getElementById('editModal');
+        const editQuestionInput = document.getElementById('editQuestion');
+        const editOptionAInput = document.getElementById('editOptionA');
+        const editOptionBInput = document.getElementById('editOptionB');
+        const editOptionCInput = document.getElementById('editOptionC');
+        const editOptionDInput = document.getElementById('editOptionD');
+        const editCorrectInput = document.getElementById('editCorrect');
+        const editExplanationInput = document.getElementById('editExplanation');
+        const updateQuestionBtn = document.getElementById('updateQuestionBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+
+
+        function sanitizeHtml(html) {
+            const tempDiv = document.createElement('div');
+            tempDiv.textContent = html;
+            return tempDiv.innerHTML;
+        }
+
+        function renderQuestionsList() {
+            questionsList.innerHTML = '';
+            if (questionData.length === 0) {
+                questionsList.appendChild(emptyMessage);
+                emptyMessage.style.display = 'block';
+            } else {
+                emptyMessage.style.display = 'none';
+                questionData.forEach(q => {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.className = 'p-4 my-2 border border-gray-200 rounded-lg bg-white shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center';
+                    questionDiv.innerHTML = `
+                        <div class="flex-grow">
+                            <p class="font-bold text-gray-800">প্রশ্ন ${q.id}: ${q.question}</p>
+                            <ul class="text-gray-600 mt-2 list-disc list-inside">
+                                <li><span class="font-medium">a:</span> ${q.options.a}</li>
+                                <li><span class="font-medium">b:</span> ${q.options.b}</li>
+                                <li><span class="font-medium">c:</span> ${q.options.c}</li>
+                                <li><span class="font-medium">d:</span> ${q.options.d}</li>
+                            </ul>
+                        </div>
+                        <div class="mt-4 sm:mt-0 flex gap-2 flex-shrink-0">
+                            <button class="edit-btn bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300" data-id="${q.id}">
+                                এডিট
+                            </button>
+                            <button class="delete-btn bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300" data-id="${q.id}">
+                                ডিলিট
+                            </button>
+                        </div>
+                    `;
+                    questionsList.appendChild(questionDiv);
+                });
+            }
+            questionCountSpan.textContent = questionData.length;
+            attachEventListeners();
+        }
+
+        function attachEventListeners() {
+            document.querySelectorAll('.edit-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const idToEdit = parseInt(e.target.dataset.id);
+                    const questionToEdit = questionData.find(q => q.id === idToEdit);
+                    if (questionToEdit) {
+                        editQuestionInput.value = questionToEdit.question;
+                        editOptionAInput.value = questionToEdit.options.a;
+                        editOptionBInput.value = questionToEdit.options.b;
+                        editOptionCInput.value = questionToEdit.options.c;
+                        editOptionDInput.value = questionToEdit.options.d;
+                        editCorrectInput.value = questionToEdit.correct;
+                        editExplanationInput.value = questionToEdit.explanation.replace('<p>', '').replace('</p>', '');
+                        editingId = idToEdit;
+                        editModal.style.display = 'flex'; // Show the modal
+                    }
+                });
+            });
+
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const idToDelete = parseInt(e.target.dataset.id);
+                    const newQuestionData = questionData.filter(q => q.id !== idToDelete);
+                    questionData.length = 0;
+                    questionData.push(...newQuestionData);
+                    renderQuestionsList();
+                    const messageBox = createMessageBox("প্রশ্নটি ডিলিট করা হয়েছে!", "success");
+                    document.body.appendChild(messageBox);
+                });
+            });
+        }
+
+        // Event listeners for the modal buttons
+        updateQuestionBtn.addEventListener('click', () => {
+            if (editingId !== null) {
+                const questionToUpdate = questionData.find(q => q.id === editingId);
+                if (questionToUpdate) {
+                    questionToUpdate.question = sanitizeHtml(editQuestionInput.value.trim());
+                    questionToUpdate.options.a = sanitizeHtml(editOptionAInput.value.trim());
+                    questionToUpdate.options.b = sanitizeHtml(editOptionBInput.value.trim());
+                    questionToUpdate.options.c = sanitizeHtml(editOptionCInput.value.trim());
+                    questionToUpdate.options.d = sanitizeHtml(editOptionDInput.value.trim());
+                    questionToUpdate.correct = editCorrectInput.value.trim().toLowerCase();
+                    questionToUpdate.explanation = `<p>${sanitizeHtml(editExplanationInput.value.trim())}</p>`;
+                    const messageBox = createMessageBox("প্রশ্নটি আপডেট করা হয়েছে!", "success");
+                    document.body.appendChild(messageBox);
+                }
+                editingId = null;
+                hideModal();
+                renderQuestionsList();
+            }
+        });
+
+        cancelEditBtn.addEventListener('click', hideModal);
+
+        function hideModal() {
+            editModal.style.display = 'none';
+        }
+
+        addQuestionBtn.addEventListener('click', () => {
+            const question = questionInput.value.trim();
+            const optionA = optionAInput.value.trim();
+            const optionB = optionBInput.value.trim();
+            const optionC = optionCInput.value.trim();
+            const optionD = optionDInput.value.trim();
+            const correct = correctInput.value.trim().toLowerCase();
+            const explanation = explanationInput.value.trim();
+
+            if (!question || !optionA || !optionB || !optionC || !optionD || !correct || !explanation) {
+                const messageBox = createMessageBox("সবগুলো ক্ষেত্র পূরণ করুন!", "warning");
+                document.body.appendChild(messageBox);
+                return;
+            }
+
+            const newQuestion = {
+                id: nextId++,
+                question: sanitizeHtml(question),
+                options: {
+                    a: sanitizeHtml(optionA),
+                    b: sanitizeHtml(optionB),
+                    c: sanitizeHtml(optionC),
+                    d: sanitizeHtml(optionD),
+                },
+                correct: correct,
+                explanation: `<p>${sanitizeHtml(explanation)}</p>`,
+            };
+            questionData.push(newQuestion);
+            const messageBox = createMessageBox("প্রশ্নটি সফলভাবে যোগ করা হয়েছে!", "success");
+            document.body.appendChild(messageBox);
+            
+            renderQuestionsList();
+            
+            questionInput.value = '';
+            optionAInput.value = '';
+            optionBInput.value = '';
+            optionCInput.value = '';
+            optionDInput.value = '';
+            correctInput.value = '';
+            explanationInput.value = '';
+            questionInput.focus();
+        });
+
+        generateJsonBtn.addEventListener('click', () => {
+            if (questionData.length === 0) {
+                const messageBox = createMessageBox("JSON তৈরি করতে প্রথমে কিছু প্রশ্ন যোগ করুন!", "warning");
+                document.body.appendChild(messageBox);
+                return;
+            }
+
+            const jsonString = JSON.stringify(questionData, null, 2);
+            outputJsonPre.textContent = jsonString;
+            outputJsonPre.style.display = 'block';
+            copyJsonBtn.style.display = 'inline-block';
+        });
+
+        copyJsonBtn.addEventListener('click', () => {
+            const textToCopy = outputJsonPre.textContent;
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    const messageBox = createMessageBox("JSON ডেটা কপি করা হয়েছে!", "success");
+                    document.body.appendChild(messageBox);
+                }).catch(err => {
+                    const messageBox = createMessageBox("কপি করতে ব্যর্থ হয়েছে। অনুগ্রহ করে ম্যানুয়ালি কপি করুন।", "error");
+                    document.body.appendChild(messageBox);
+                });
+            } else {
+                const tempTextArea = document.createElement('textarea');
+                tempTextArea.value = textToCopy;
+                document.body.appendChild(tempTextArea);
+                tempTextArea.select();
+                try {
+                    document.execCommand('copy');
+                    const messageBox = createMessageBox("JSON ডেটা কপি করা হয়েছে!", "success");
+                    document.body.appendChild(messageBox);
+                } catch (err) {
+                    const messageBox = createMessageBox("কপি করতে ব্যর্থ হয়েছে। অনুগ্রহ করে ম্যানুয়ালি কপি করুন।", "error");
+                    document.body.appendChild(messageBox);
+                }
+                document.body.removeChild(tempTextArea);
+            }
+        });
+
+        function createMessageBox(message, type) {
+            const box = document.createElement('div');
+            let bgColor = '';
+            let borderColor = '';
+            switch(type) {
+                case 'success':
+                    bgColor = 'bg-emerald-100';
+                    borderColor = 'border-emerald-500';
+                    break;
+                case 'warning':
+                    bgColor = 'bg-amber-100';
+                    borderColor = 'border-amber-500';
+                    break;
+                case 'error':
+                    bgColor = 'bg-red-100';
+                    borderColor = 'border-red-500';
+                    break;
+                default:
+                    bgColor = 'bg-gray-100';
+                    borderColor = 'border-gray-500';
+            }
+
+            box.className = `fixed top-5 left-1/2 transform -translate-x-1/2 p-4 rounded-lg shadow-lg border-l-4 ${bgColor} ${borderColor} z-50 transition-all duration-300 ease-out`;
+            box.innerHTML = `<p class="text-gray-800">${message}</p>`;
+
+            setTimeout(() => {
+                box.classList.add('-translate-y-full', 'opacity-0');
+                box.addEventListener('transitionend', () => box.remove());
+            }, 3000);
+
+            return box;
+        }
+        
+        renderQuestionsList();
+    </script>
+</body>
+</html>
