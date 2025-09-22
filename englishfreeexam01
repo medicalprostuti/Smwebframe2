@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="bn">
+  <head>
+    <script>
+      document.addEventListener("contextmenu", (event) =>
+        event.preventDefault()
+      );
+      document.addEventListener("keydown", (event) => {
+        if (
+          (event.ctrlKey &&
+            ["u", "s", "i", "j"].includes(event.key.toLowerCase())) ||
+          event.key === "F12"
+        ) {
+          event.preventDefault();
+        }
+      });
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Online Exam</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap");
+
+      body {
+        font-family: "Hind Siliguri", sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .container {
+        font-family: "Hind Siliguri", sans-serif;
+        width: 100%;
+        margin: auto;
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        min-height: 80vh;
+      }
+
+      .exam-content {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      h1 {
+        color: #1b0b54;
+        text-align: center;
+        margin-bottom: 10px;
+      }
+
+      #timer {
+        font-size: 20px;
+        color: #1b0b54;
+        margin-bottom: 5px;
+        font-weight: normal;
+        text-align: center;
+      }
+
+      #exam-info {
+        font-size: 16px;
+        color: black;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      #exam {
+        width: 100%;
+        min-height: 100px;
+      }
+
+      .chart-container {
+        width: 200px;
+        height: 200px;
+        margin: 10px auto;
+        background-color: #f9f9f9;
+        border-radius: 15px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        display: none;
+        padding: 10px;
+      }
+
+      .chart-container.visible {
+        display: block;
+      }
+
+      .question-container {
+        text-align: left;
+        margin-bottom: 20px;
+        display: none;
+      }
+
+      .question-label {
+        font-weight: bold;
+        color: #1b0b54;
+        margin-bottom: 10px;
+      }
+
+      .options {
+        margin-top: 10px;
+      }
+
+      .option {
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 5px;
+        text-transform: uppercase;
+      }
+
+      .circle {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid #1b0b54;
+        margin-right: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #1b0b54;
+        font-weight: bold;
+        font-size: 18px;
+      }
+
+      .selected .circle {
+        background-color: #1b0b54;
+        color: white;
+      }
+
+      .correct-text {
+        color: green !important;
+      }
+
+      .incorrect-text {
+        color: #ff0800 !important;
+      }
+
+      .unattempted-text {
+        color: orange !important;
+      }
+
+      /* Updated CSS for submit button */
+      .button-container {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin-top: 20px; /* Added margin-top to separate from questions */
+      }
+
+      #submitBtn {
+        font-family: hind siliguri;
+        padding: 15px 30px;
+        background-color: #1b0b54;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: bold;
+        border-radius: 10px;
+        width: 200px;
+        transition: background-color 0.3s ease;
+      }
+
+      #submitBtn:hover {
+        background-color: #1b0b54;
+      }
+
+      .popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 20px;
+        width: 300px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        text-align: center;
+        display: none;
+        z-index: 1000;
+        transition: transform 0.5s ease, opacity 0.5s ease;
+      }
+
+      .popup.slide-out {
+        transform: translate(-50%, -100%);
+        opacity: 0;
+      }
+
+      .popup-header {
+        background-color: #1b0b54;
+        color: white;
+        padding: 10px;
+        font-size: 20px;
+        font-weight: bold;
+        border-radius: 10px 10px 0 0;
+      }
+
+      .popup-body {
+        padding: 15px;
+      }
+
+      .popup-body p {
+        margin: 10px 0;
+      }
+
+      .confirm-btn {
+        font-family: hind siliguri;
+        background-color: #34c759;
+        color: white;
+        padding: 8px 15px;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        border-radius: 5px;
+        margin: 5px;
+      }
+
+      .confirm-btn:hover {
+        background-color: #34c759;
+      }
+
+      .cancel-btn {
+        background-color: #ff3b30;
+        color: white;
+        padding: 8px 15px;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        border-radius: 5px;
+        margin: 5px;
+      }
+
+      .cancel-btn:hover {
+        background-color: #e02b21;
+      }
+
+      .explanation-dropdown {
+        display: none;
+        margin-top: 10px;
+      }
+
+      .explanation-dropdown.visible {
+        display: block;
+      }
+
+      .explanation-btn {
+        background-color: #1b0b54;
+        color: white;
+        padding: 8px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        font-family: "Hind Siliguri", sans-serif;
+        width: 40%;
+        text-align: left;
+        position: relative;
+      }
+
+      .explanation-btn:hover {
+        background-color: #1b0b54;
+      }
+
+      .explanation-btn::after {
+        content: "▼";
+        position: absolute;
+        right: 10px;
+        font-size: 12px;
+      }
+
+      .explanation-btn.active::after {
+        content: "▲";
+      }
+
+      .explanation-content {
+        display: none;
+        padding: 15px;
+        background-color: #f9f9f9;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 14px;
+        color: #000000;
+        text-align: left;
+        max-height: 450px;
+        overflow-y: auto;
+        margin-top: 5px;
+      }
+
+      .explanation-content.visible {
+        display: block;
+      }
+
+      .explanation-content p {
+        margin: 0 0 10px 0;
+      }
+
+      .explanation-content ul {
+        margin: 0;
+        padding-left: 20px;
+      }
+
+      .explanation-content li {
+        margin-bottom: 5px;
+      }
+
+      .explanation-content strong {
+        color: #1b0b54;
+      }
+
+      .explanation-label {
+        font-weight: bold;
+        color: #1b0b54;
+        margin-bottom: 10px;
+        display: block;
+      }
+
+      .locked .option {
+        pointer-events: none;
+        cursor: default;
+      }
+
+      .locked .option.selected {
+        pointer-events: none;
+        cursor: default;
+      }
+
+      /* Updated CSS for serial number input section */
+      .serial-input-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      .serial-input-container p {
+        color: #1b0b54;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+
+      .serial-input-container input {
+        width: 100%;
+        max-width: 250px;
+        padding: 10px;
+        font-size: 16px;
+        text-align: center;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        margin-bottom: 15px;
+        font-family: "Hind Siliguri", sans-serif; /* Added font-family */
+      }
+
+      .serial-input-container input::placeholder {
+        font-family: "Hind Siliguri", sans-serif; /* Added font-family to placeholder */
+      }
+
+      /* New styling for start exam button */
+      #startExamBtn {
+        font-family: hind siliguri;
+        padding: 12px 25px;
+        background-color: #1b0b54;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        border-radius: 8px;
+        width: 150px; /* Reduced width */
+        transition: background-color 0.3s ease;
+      }
+
+      #startExamBtn:hover {
+        background-color: #1b0b54;
+      }
+
+      /* Updated CSS for error popup */
+      #errorPopup {
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Reduced shadow */
+      }
+      #errorPopup .popup-body {
+        min-height: unset; /* Ensure height is minimal */
+        padding-bottom: 10px; /* Adjust padding as needed */
+      }
+      #errorPopup .popup-body p {
+        margin-top: 0;
+        margin-bottom: 15px; /* Adjust margin as needed */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container" id="examContainer">
+      <div class="exam-content">
+        <h1>বোটানি অনুশীলন</h1>
+        <div id="serialInputContainer" class="serial-input-container">
+          <p>তোমার সিরিয়াল নম্বরটি দাও:</p>
+          <input
+            type="number"
+            id="serialNumberInput"
+            placeholder="সিরিয়াল নম্বর"
+            maxlength="5"
+          />
+          <button id="startExamBtn">শুরু করো</button>
+        </div>
+        <div id="examContentArea" style="display: none">
+          <div id="timer"></div>
+          <div id="exam-info"></div>
+          <div class="chart-container">
+            <canvas id="scoreChart"></canvas>
+          </div>
+          <div id="exam">
+            </div>
+          <div class="button-container">
+            <button id="submitBtn">সাবমিট</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="popup" id="scorePopup">
+      <div class="popup-header">তোমার স্কোর</div>
+      <div class="popup-body">
+        <p>
+          <strong>সিরিয়াল নম্বর:</strong> <span id="popupSerial"></span>
+        </p>
+        <p>
+          <strong>মোট প্রশ্ন:</strong> <span id="totalQuestions"></span>
+        </p>
+        <p>
+          <strong>উত্তর দিয়েছো:</strong>
+          <span style="color: #000000" id="answered"></span>
+        </p>
+        <p>
+          <strong>সঠিক উত্তর:</strong>
+          <span style="color: #0ab853" id="correctAnswers"></span>
+        </p>
+        <p>
+          <strong>ভুল উত্তর:</strong>
+          <span style="color: #f81010" id="wrongAnswers"></span>
+        </p>
+        <p>
+          <strong>অনুত্তরিত:</strong>
+          <span style="color: #ffc801" id="unanswered"></span>
+        </p>
+        <p><strong>তোমার চূড়ান্ত স্কোর:</strong></p>
+        <h2 style="color: #1b0b54"><span id="finalScore"></span></h2>
+        <form id="scoreForm" action="https://formspree.io/f/xpwdgpby" method="POST">
+          <input type="hidden" name="serialNumber" id="formSerialNumber" />
+          <input type="hidden" name="actionType" value="exam_submit" />
+          <input type="hidden" name="submissionTime" id="formSubmissionTime" />
+          <input type="hidden" name="finalScore" id="formFinalScore" />
+          <input type="hidden" name="correctAnswers" id="formCorrectAnswers" />
+          <input type="hidden" name="wrongAnswers" id="formWrongAnswers" />
+          <input type="hidden" name="unanswered" id="formUnanswered" />
+          <button
+            type="submit"
+            class="confirm-btn"
+            style="background-color: #1b0b54"
+          >
+            <b>ওকে</b>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="popup" id="confirmPopup">
+      <div class="popup-header">কনফার্ম করো</div>
+      <div class="popup-body">
+        <p>
+          ভালো করে দেখে নাও! <br />
+          পরীক্ষা শেষ করতে চাও তো?
+        </p>
+        <button class="confirm-btn" onclick="confirmSubmit()">
+          <b>হ্যাঁ</b>
+        </button>
+        <button class="cancel-btn" onclick="cancelSubmit()"><b>না</b></button>
+      </div>
+    </div>
+
+    <div class="popup" id="errorPopup">
+      <div class="popup-header">ত্রুটি</div>
+      <div class="popup-body">
+        <p>সিরিয়াল নম্বরটি অবশ্যই ৫-সংখ্যার হতে হবে।</p>
+        <button class="confirm-btn" onclick="closeErrorPopup()">
+          <b>ওকে</b>
+        </button>
+      </div>
+    </div>
+
+    <script>
+      let chartInstance = null;
+      let serialNumber = "";
+      let examStartTime = null;
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const startExamBtn = document.getElementById("startExamBtn");
+        startExamBtn.addEventListener("click", startExam);
+
+        const submitBtn = document.getElementById("submitBtn");
+        submitBtn.addEventListener("click", showConfirmPopup);
+      });
+
+      function startExam() {
+        const serialNumberInput = document.getElementById("serialNumberInput");
+        const inputSerial = serialNumberInput.value.trim();
+
+        if (inputSerial.length !== 5 || isNaN(inputSerial)) {
+          showErrorPopup();
+          return;
+        }
+
+        serialNumber = inputSerial;
+        examStartTime = new Date().toISOString();
+
+        // Send start time data to Formspree in the background
+        sendFormspreeData({
+          serialNumber: serialNumber,
+          actionType: "exam_start",
+          startTime: examStartTime,
+        });
+
+        // Hide serial input and show exam content
+        document.getElementById("serialInputContainer").style.display = "none";
+        document.getElementById("examContentArea").style.display = "block";
+
+        generateQuestions();
+        startTimer();
+      }
+
+      function sendFormspreeData(data) {
+        const formData = new FormData();
+        for (const key in data) {
+          formData.append(key, data[key]);
+        }
+        const url = "https://formspree.io/f/xpwdgpby";
+        navigator.sendBeacon(url, formData);
+      }
+
+      const questions = [
+       
+  {
+    "id": 109,
+    "question": "কোনটি Abstract Noun?",
+    "options": {
+      "a": "Long",
+      "b": "Height (হাইট)",
+      "c": "Man",
+      "d": "Jury"
+    },
+    "correct": "b",
+    "explanation": "<p>Abstract Noun হলো এমন একটি বিশেষ্য যা স্পর্শ করা বা দেখা যায় না, বরং এটি অনুভূতি, গুণ, অবস্থা বা ধারণাকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Long:</b> 'Long' একটি বিশেষণ (Adjective), যা দৈর্ঘ্য বোঝায়। এটি সরাসরি Abstract Noun নয়, তবে এর Abstract Noun রূপ হলো 'Length'।</li><li><b>(B) Height:</b> 'Height' (উচ্চতা) একটি Abstract Noun, কারণ এটি একটি পরিমাপ বা গুণ বোঝায় যা স্পর্শ করা যায় না।</li><li><b>(C) Man:</b> 'Man' একটি Common Noun, কারণ এটি একটি ব্যক্তি বা জাতিকে বোঝায়।</li><li><b>(D) Jury:</b> 'Jury' একটি Collective Noun, কারণ এটি একটি গোষ্ঠী বা দলকে বোঝায়।</li></ul>"
+  },
+  {
+    "id": 110,
+    "question": "নিচের কোনটি Abstract Noun এর উদাহরণ?",
+    "options": {
+      "a": "Child",
+      "b": "Boy",
+      "c": "Family",
+      "d": "Childhood"
+    },
+    "correct": "d",
+    "explanation": "<p>Abstract Noun হলো এমন বিশেষ্য যা কোনো গুণ, অবস্থা বা ধারণাকে বোঝায় এবং যা স্পর্শ করা যায় না।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Child:</b> 'Child' একটি Common Noun, কারণ এটি একটি ব্যক্তিকে বোঝায়।</li><li><b>(B) Boy:</b> 'Boy'ও একটি Common Noun, কারণ এটি একটি নির্দিষ্ট লিঙ্গের ব্যক্তিকে বোঝায়।</li><li><b>(C) Family:</b> 'Family' একটি Collective Noun, কারণ এটি একটি গোষ্ঠীকে বোঝায়।</li><li><b>(D) Childhood:</b> 'Childhood' একটি Abstract Noun, কারণ এটি একটি অবস্থা বা সময়কাল বোঝায় যা স্পর্শ করা যায় না।</li></ul>"
+  },
+  {
+    "id": 112,
+    "question": "Abstract noun of the word 'Long' is-",
+    "options": {
+      "a": "Length",
+      "b": "Longer",
+      "c": "Lengthier",
+      "d": "Lengthen"
+    },
+    "correct": "a",
+    "explanation": "<p>Abstract Noun হলো এমন বিশেষ্য যা কোনো গুণ বা পরিমাপকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Length:</b> 'Length' হলো 'Long' শব্দের Abstract Noun, কারণ এটি দৈর্ঘ্য নামক গুণ বা পরিমাপ বোঝায়।</li><li><b>(B) Longer:</b> 'Longer' একটি তুলনামূলক বিশেষণ (Comparative Adjective)।</li><li><b>(C) Lengthier:</b> 'Lengthier'ও একটি তুলনামূলক বিশেষণ।</li><li><b>(D) Lengthen:</b> 'Lengthen' একটি ক্রিয়া (Verb), যা দৈর্ঘ্য বাড়ানো বোঝায়।</li></ul>"
+  },
+  {
+    "id": 113,
+    "question": "The best word stands for Abstract noun is-",
+    "options": {
+      "a": "Beauty",
+      "b": "Boat",
+      "c": "Sail",
+      "d": "Bird"
+    },
+    "correct": "a",
+    "explanation": "<p>Abstract Noun হলো এমন বিশেষ্য যা কোনো গুণ, অনুভূতি বা ধারণাকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Beauty:</b> 'Beauty' একটি Abstract Noun, কারণ এটি একটি গুণ বোঝায় যা দেখা বা স্পর্শ করা যায় না।</li><li><b>(B) Boat:</b> 'Boat' একটি Common Noun, কারণ এট একটি বস্তু।</li><li><b>(C) Sail:</b> 'Sail' একটি Common Noun, কারণ এটি একটি বস্তু বা ক্রিয়া হিসেবে ব্যবহৃত হয়।</li><li><b>(D) Bird:</b> 'Bird' একটি Common Noun, কারণ এটি একটি প্রাণীকে বোঝায়।</li></ul>"
+  },
+  {
+    "id": 114,
+    "question": "Iron is a useful metal. এখানে 'Iron' শব্দটি কোন প্রকারের Noun?",
+    "options": {
+      "a": "Proper Noun",
+      "b": "Material Noun",
+      "c": "Collective Noun",
+      "d": "Common Noun"
+    },
+    "correct": "b anniversary",
+    "explanation": "<p>Material Noun হলো এমন বিশেষ্য যা কোনো বস্তুকে বোঝায় যা স্পর্শ করা যায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Proper Noun:</b> 'Iron' একটি নির্দিষ্ট নাম নয়, তাই এটি Proper Noun নয়।</li><li><b>(B) Material Noun:</b> 'Iron' একটি Material Noun, কারণ এটি একটি বস্তু বা পদার্থ বোঝায়।</li><li><b>(C) Collective Noun:</b> 'Iron' একটি গোষ্ঠী নয়, তাই এটি Collective Noun নয়।</li><li><b>(D) Common Noun:</b> 'Iron' সাধারণভাবে একটি ধাতুকে বোঝায়, তাই এটি Common Noun নয়।</li></ul>"
+  },
+  {
+    "id": 115,
+    "question": "নিম্নের কোনটি Abstract Noun নয়?",
+    "options": {
+      "a": "Air",
+      "b": "Goodwill",
+      "c": "Flavour",
+      "d": "Water"
+    },
+    "correct": "a",
+    "explanation": "<p>Abstract Noun হলো এমন বিশেষ্য যা অনুভূতি, গুণ বা ধারণাকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Air:</b> 'Air' একটি Material Noun, কারণ এটি একটি বস্তু বা পদার্থ বোঝায়।</li><li><b>(B) Goodwill:</b> 'Goodwill' একটি Abstract Noun, কারণ এটি একটি গুণ বা ধারণা।</li><li><b>(C) Flavour:</b> 'Flavour' একটি Abstract Noun, কারণ এটি একটি গুণ।</li><li><b>(D) Water:</b> 'Water' একটি Material Noun, কারণ এটি একটি পদার্থ।</li></ul>"
+  },
+  {
+    "id": 116,
+    "question": "'I saw a flock of sheep,' বাক্যে 'flock' শব্দটি কোন প্রকারের Noun?",
+    "options": {
+      "a": "Proper Noun",
+      "b": "Common Noun",
+      "c": "Collective Noun",
+      "d": "Material Noun"
+    },
+    "correct": "c",
+    "explanation": "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Proper Noun:</b> 'Flock' কোনো নির্দিষ্ট নাম নয়।</li><li><b>(B) Common Noun:</b> 'Flock' সাধারণভাবে একটি বস্তু নয়, বরং একটি গোষ্ঠী বোঝায়।</li><li><b>(C) Collective Noun:</b> 'Flock' একটি Collective Noun, কারণ এটি ভেড়ার দল বোঝায়।</li><li><b>(D) Material Noun:</b> 'Flock' কোনো পদার্থ নয়।</li></ul>"
+  },
+  {
+    "id": 117,
+    "question": "Our team is better than yours. বাক্যে 'Team' শব্দটি কোন প্রকারের Noun?",
+    "options": {
+      "a": "Common Noun",
+      "b": "Collective Noun",
+      "c": "Material Noun",
+      "d": "Abstract Noun"
+    },
+    "correct": "b",
+    "explanation": "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Common Noun:</b> 'Team' সাধারণভাবে একটি বস্তু নয়, বরং একটি গোষ্ঠী বোঝায়।</li><li><b>(B) Collective Noun:</b> 'Team' একটি Collective Noun, কারণ এটি একটি দল বোঝায়।</li><li><b>(C) Material Noun:</b> 'Team' কোনো পদার্থ নয়।</li><li><b>(D) Abstract Noun:</b> 'Team' কোনো গুণ বা ধারণা নয়।</li></ul>"
+  },
+  {
+    "id": 118,
+    "question": "Which group of words are Collective Nouns?",
+    "options": {
+      "a": "Sajib, America",
+      "b": "Water, Milk, Steel",
+      "c": "Cattle, Army, Class",
+      "d": "Unity, Health, Poverty"
+    },
+    "correct": "c",
+    "explanation": "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Sajib, America:</b> 'Sajib' ও 'America' হলো Proper Noun।</li><li><b>(B) Water, Milk, Steel:</b> এগুলো Material Noun।</li><li><b>(C) Cattle, Army, Class:</b> এগুলো Collective Noun, কারণ এরা গোষ্ঠী বোঝায়।</li><li><b>(D) Unity, Health, Poverty:</b> এগুলো Abstract Noun, কারণ এরা গুণ বা ধারণা বোঝায়।</li></ul>"
+  },
+  {
+    "id": 119,
+    "question": "কোনটি Abstract Noun?",
+    "options": {
+      "a": "Elephant",
+      "b": "Harbour",
+      "c": "Strength",
+      "d": "Dhaka"
+    },
+    "correct": "c",
+    "explanation": "<p>Abstract Noun হলো এমন বিশেষ্য যা গুণ, অনুভূতি বা ধারণাকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Elephant:</b> 'Elephant' একটি Common Noun, কারণ এটি একটি প্রাণী।</li><li><b>(B) Harbour:</b> 'Harbour' একটি Common Noun, কারণ এটি একটি স্থান।</li><li><b>(C) Strength:</b> 'Strength' একটি Abstract Noun, কারণ এটি একটি গুণ।</li><li><b>(D) Dhaka:</b> 'Dhaka' একটি Proper Noun, কারণ এটি একটি নির্দিষ্ট স্থানের নাম।</li></ul>"
+  },
+  {
+    "id": 120,
+    "question": "কোনটি Common Noun?",
+    "options": {
+      "a": "February",
+      "b": "Jute",
+      "c": "Month",
+      "d": "Class"
+    },
+    "correct": "c",
+    "explanation": "<p>Common Noun হলো এমন বিশেষ্য যা সাধারণ বস্তু, ব্যক্তি বা স্থানকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) February:</b> 'February' একটি Proper Noun, কারণ এটি একটি নির্দিষ্ট মাসের নাম।</li><li><b>(B) Jute:</b> 'Jute' একটি Material Noun, কারণ এটি একটি পদার্থ।</li><li><b>(C) Month:</b> 'Month' একটি Common Noun, কারণ এটি সাধারণভাবে মাস বোঝায়।</li><li><b>(D) Class:</b> 'Class' একটি Collective Noun, কারণ এটি একটি গোষ্ঠী বোঝায়।</li></ul>"
+  },
+  {
+    "id": 121,
+    "question": "কোনটি Collective Noun?",
+    "options": {
+      "a": "Boy",
+      "b": "Books",
+      "c": "Library",
+      "d": "Mouth"
+    },
+    "correct": "c",
+    "explanation": "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Boy:</b> 'Boy' একটি Common Noun, কারণ এটি একটি ব্যক্তি।</li><li><b>(B) Books:</b> 'Books' একটি Common Noun, কারণ এটি বস্তু।</li><li><b>(C) Library:</b> 'Library' একটি Collective Noun, কারণ এটি বইয়ের সমষ্টি বোঝায়।</li><li><b>(D) Mouth:</b> 'Mouth' একটি Common Noun, কারণ এটি শরীরের একটি অংশ।</li></ul>"
+  },
+  {
+    "id": 122,
+    "question": "What kind of noun is 'Dhaka'?",
+    "options": {
+      "a": "Proper",
+      "b": "Common",
+      "c": "Collective",
+      "d": "Material"
+    },
+    "correct": "a",
+    "explanation": "<p>Proper Noun হলো এমন বিশেষ্য যা নির্দিষ্ট ব্যক্তি, স্থান বা বস্তুর নাম বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Proper:</b> 'Dhaka' একটি Proper Noun, কারণ এটি একটি নির্দিষ্ট স্থানের নাম।</li><li><b>(B) Common:</b> 'Dhaka' সাধারণ নয়, তাই Common Noun নয়।</li><li><b>(C) Collective:</b> 'Dhaka' কোনো গোষ্ঠী নয়।</li><li><b>(D) Material:</b> 'Dhaka' কোনো পদার্থ নয়।</li></ul>"
+  },
+  {
+    "id": 123,
+    "question": "Which one of the following is an example of Proper Noun?",
+    "options": {
+      "a": "The police",
+      "b": "Car",
+      "c": "Bangladesh",
+      "d": "Family"
+    },
+    "correct": "c",
+    "explanation": "<p>Proper Noun হলো এমন বিশেষ্য যা নির্দিষ্ট ব্যক্তি, স্থান বা বস্তুর নাম বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) The police:</b> 'Police' একটি Collective Noun।</li><li><b>(B) Car:</b> 'Car' একটি Common Noun।</li><li><b>(C) Bangladesh:</b> 'Bangladesh' একটি Proper Noun, কারণ এটি একটি নির্দিষ্ট দেশের নাম।</li><li><b>(D) Family:</b> 'Family' একটি Collective Noun।</li></ul>"
+  },
+  {
+    "id": 124,
+    "question": "Flock is a-",
+    "options": {
+      "a": "Proper Noun",
+      "b": "Common Noun",
+      "c": "Collective Noun",
+      "d": "Abstract Noun"
+    },
+    "correct": "c",
+    "explanation": "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Proper Noun:</b> 'Flock' কোনো নির্দিষ্ট নাম নয়।</li><li><b>(B) Common Noun:</b> 'Flock' সাধারণ বস্তু নয়, বরং একটি গোষ্ঠী।</li><li><b>(C) Collective Noun:</b> 'Flock' একটি Collective Noun, কারণ এটি পশুদের দল বোঝায়।</li><li><b>(D) Abstract Noun:</b> 'Flock' কোনো গুণ বা ধারণা নয়।</li></ul>"
+  },
+  {
+    "id": 125,
+    "question": "What kind of noun is 'journey'?",
+    "options": {
+      "a": "Common",
+      "b": "Collective",
+      "c": "Proper",
+      "d": "Abstract"
+    },
+    "correct": "a",
+    "explanation": "<p>Common Noun হলো এমন বিশেষ্য যা সাধারণ বস্তু, ব্যক্তি বা ধারণাকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Common:</b> 'Journey' একটি Common Noun, কারণ এটি একটি সাধারণ ধারণা বা কাজ বোঝায়।</li><li><b>(B) Collective:</b> 'Journey' কোনো গোষ্ঠী নয়।</li><li><b>(C) Proper:</b> 'Journey' কোনো নির্দিষ্ট নাম নয়।</li><li><b>(D) Abstract:</b> 'Journey' একটি ক্রিয়া বা অভিজ্ঞতা হলেও এটি সাধারণত Common Noun হিসেবে বিবেচিত হ彼此</li></ul>"
+  },
+  {
+    "id": 126,
+    "question": "Find the collective noun from the following:",
+    "options": {
+      "a": "Water",
+      "b": "Cow",
+      "c": "Kindness",
+      "d": "Army"
+    },
+    "correct": "d",
+    "explanation": "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Water:</b> 'Water' একটি Material Noun।</li><li><b>(B) Cow:</b> 'Cow' একটি Common Noun।</li><li><b>(C) Kindness:</b> 'Kindness' একটি Abstract Noun।</li><li><b>(D) Army:</b> 'Army' একটি Collective Noun, কারণ এটি একটি গোষ্ঠী বোঝায়।</li></ul>"
+  },
+  {
+    "id": 127,
+    "question": "Which of the following words is not similar to 'school'?",
+    "options": {
+      "a": "Flock",
+      "b": "Herd",
+      "c": "College",
+      "d": "Pack"
+    },
+    "correct": "c",
+    "explanation": "<p>'School' একটি Collective Noun, যা একটি গোষ্ঠী বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Flock:</b> 'Flock' একটি Collective Noun, যা পশুদের দল বোঝায়।</li><li><b>(B) Herd:</b> 'Herd' একটি Collective Noun, যা পশুদের দল বোঝায়।</li><li><b>(C) College:</b> 'College' একটি Common Noun, কারণ এটি একটি সাধারণ স্থান বোঝায়।</li><li><b>(D) Pack:</b> 'Pack' একটি Collective Noun, যা পশুদের দল বোঝায়।</li></ul>"
+  },
+  {
+    "id": 128,
+    "question": "Which one of the following is a Common Noun?",
+    "options": {
+      "a": "Pirate",
+      "b": "Humility",
+      "c": "Roguery",
+      "d": "Straw"
+    },
+    "correct": "a",
+    "explanation": "<p>Common Noun হলো এমন বিশেষ্য যা সাধারণ বস্তু, ব্যক্তি বা স্থানকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Pirate:</b> 'Pirate' একটি Common Noun, কারণ এটি একটি সাধারণ ব্যক্তি বোঝায়।</li><li><b>(B) Humility:</b> 'Humility' একটি Abstract Noun, কারণ এটি একটি গুণ।</li><li><b>(C) Roguery:</b> 'Roguery' একটি Abstract Noun, কারণ এটি একটি গুণ।</li><li><b>(D) Straw:</b> 'Straw' একটি Material Noun, কারণ এটি একটি পদার্থ।</li></ul>"
+  },
+  {
+    "id": 129,
+    "question": "Water has no colour of its own. What type of noun the underlined word is?",
+    "options": {
+      "a": "Common",
+      "b": "Abstract",
+      "c": "Proper",
+      "d": "Material"
+    },
+    "correct": "d",
+    "explanation": "<p>Material Noun হলো এমন বিশেষ্য যা কোনো বস্তু বা পদার্থকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Common:</b> 'Water' সাধারণ নয়, বরং একটি পদার্থ।</li><li><b>(B) Abstract:</b> 'Water' কোনো গুণ বা ধারণা নয়।</li><li><b>(C) Proper:</b> 'Water' কোনো নির্দিষ্ট নাম নয়।</li><li><b>(D) Material:</b> 'Water' একটি Material Noun, কারণ এটি একটি পদার্থ।</li></ul>"
+  },
+  {
+    "id": 130,
+    "question": "What kind of noun is 'Infant'?",
+    "options": {
+      "a": "Proper",
+      "b": "Common",
+      "c": "Material",
+      "d": "Collective"
+    },
+    "correct": "b",
+    "explanation": "<p>Common Noun হলো এমন বিশেষ্য যা সাধারণ বস্তু, ব্যক্তি বা স্থানকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Proper:</b> 'Infant' কোনো নির্দিষ্ট নাম নয়।</li><li><b>(B) Common:</b> 'Infant' একটি Common Noun, কারণ এটি একটি সাধারণ ব্যক্তি বোঝায়।</li><li><b>(C) Material:</b> 'Infant' কোনো পদার্থ নয়।</li><li><b>(D) Collective:</b> 'Infant' কোনো গোষ্ঠী নয়।</li></ul>"
+shad
+  },
+  {
+    "id": 131,
+    "question": "The word 'hatred (হেইট্রিড-ঘৃণা)' is noun.",
+    "options": {
+      "a": "Abstract",
+      "b": "Proper",
+      "c": "Collective",
+      "d": "Material"
+    },
+    "correct": "a",
+    "explanation": "<p>Abstract Noun হলো এমন বিশেষ্য যা অনুভূতি, গুণ বা ধারণাকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Abstract:</b> 'Hatred' একটি Abstract Noun, কারণ এটি একটি অনুভূতি বোঝায়।</li><li><b>(B) Proper:</b> 'Hatred' কোনো নির্দিষ্ট নাম নয়।</li><li><b>(C) Collective:</b> 'Hatred' কোনো গোষ্ঠী নয়।</li><li><b>(D) Material:</b> 'Hatred' কোনো পদার্থ নয়।</li></ul>"
+  },
+  {
+    "id": 132,
+    "question": "'Love', 'courage' and 'childhood' are examples of-",
+    "options": {
+      "a": "Proper Nouns",
+      "b": "Abstract Nouns",
+      "c": "Countable Nouns",
+      "d": "Common Nouns"
+    },
+    "correct": "b",
+    "explanation": "<p>Abstract Noun হলো এমন বিশেষ্য যা গুণ, অনুভূতি বা ধারণাকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Proper Nouns:</b> এগুলো নির্দিষ্ট নাম নয়।</li><li><b>(B) Abstract Nouns:</b> 'Love', 'Courage', 'Childhood' হলো Abstract Noun, কারণ এগুলো অনুভূতি ও অবস্থা বোঝায়।</li><li><b>(C) Countable Nouns:</b> এগুলো গণনাযোগ্য হলেও প্রধানত Abstract Noun।</li><li><b>(D) Common Nouns:</b> এগুলো সাধারণ বস্তু বা ব্যক্তি নয়।</li></ul>"
+  },
+  {
+    "id": 133,
+    "question": "Which noun below is a Collective Noun?",
+    "options": {
+      "a": "Men",
+      "b": "Duck",
+      "c": "Family",
+      "d": "Children"
+    },
+    "correct": "c",
+    "explanation": "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Men:</b> 'Men' একটি Common Noun, কারণ এটি ব্যক্তিদের বোঝায়।</li><li><b>(B) Duck:</b> 'Duck' একটি Common Noun, কারণ এটি একটি প্রাণী।</li><li><b>(C) Family:</b> 'Family' একটি Collective Noun, কারণ এটি একটি গোষ্ঠী বোঝায়।</li><li><b>(D) Children:</b> 'Children' একটি Common Noun, কারণ এটি ব্যক্তিদের বোঝায়।</li></ul>"
+  },
+  {
+    "id": 134,
+    "question": "An enormous _____ of locusts ate all of the crops.",
+    "options": {
+      "a": "Swarm",
+      "b": "Bunch",
+      "c": "Herd",
+      "d": "Bevy",
+      "e": "School"
+    },
+    "correct": "a",
+    "explanation": "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Swarm:</b> 'Swarm' একটি Collective Noun, কারণ এটি পোকামাকড়ের দল বোঝায়।</li><li><b>(B) Bunch:</b> 'Bunch' একটি Collective Noun, কিন্তু পোকামাকড়ের জন্য ব্যবহৃত হয় না।</li><li><b>(C) Herd:</b> 'Herd' পশুদের দলের জন্য ব্যবহৃত হয়।</li><li><b>(D) Bevy:</b> 'Bevy' পাখিদের দলের জন্য ব্যবহৃত হয়।</li><li><b>(E) School:</b> 'School' মাছের দলের জন্য ব্যবহৃত হয়।</li></ul>"
+  },
+  {
+    "id": 135,
+    "question": "A _____ of banknotes.",
+    "options": {
+      "a": "Bunch",
+      "b": "Wad",
+      "c": "Hatch",
+      "d": "Group"
+    },
+    "correct": "b",
+    "explanation": "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Bunch:</b> 'Bunch' একটি Collective Noun, কিন্তু টাকার জন্য সাধারণত ব্যবহৃত হয় না।</li><li><b>(B) Wad:</b> 'Wad' একটি Collective Noun, যা টাকার গোষ্ঠী বোঝায়।</li><li><b>(C) Hatch:</b> 'Hatch' ডিমের গোষ্ঠী বোঝায়।</li><li><b>(D) Group:</b> 'Group' একটি Collective Noun, কিন্তু টাকার জন্য 'Wad' বেশি উপযুক্ত।</li></ul>"
+  },
+  {
+    "id": 136,
+    "question": "A _____ of fish.",
+    "options": {
+      "a": "Flock",
+      "b": "Group",
+      "c": "School",
+      "d": "Fleet"
+    },
+    "correct": "c",
+    "explanation": "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Flock:</b> 'Flock' পাখি বা ভেড়ার দলের জন্য ব্যবহৃত হয়।</li><li><b>(B) Group:</b> 'Group' একটি সাধারণ Collective Noun, কিন্তু মাছের জন্য 'School' বেশি উপযুক্ত।</li><li><b>(C) School:</b> 'School' একটি Collective Noun, যা মাছের দল বোঝায়।</li><li><b>(D) Fleet:</b> 'Fleet' জাহাজের দলের জন্য ব্যবহৃত হয়।</li></ul>"
+  },
+  {
+    "id": 137,
+    "question": "Which of the following is an Abstract Noun?",
+    "options": {
+      "a": "People",
+      "b": "Honesty",
+      "c": "Sun",
+      "d": "River"
+    },
+    "correct": "b",
+    "explanation": "<p>Abstract Noun হলো এমন বিশেষ্য যা গুণ, অনুভূতি বা ধারণাকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) People:</b> 'People' একটি Common Noun।</li><li><b>(B) Honesty:</b> 'Honesty' একটি Abstract Noun, কারণ এটি একটি গুণ।</li><li><b>(C) Sun:</b> 'Sun' একটি Proper Noun।</li><li><b>(D) River:</b> 'River' একটি Common Noun।</li></ul>"
+  },
+  {
+    "id": 138,
+    "question": "Which is not Proper Noun?",
+    "options": {
+      "a": "People",
+      "b": "Karim",
+      "c": "Sun",
+      "d": "River"
+    },
+    "correct": "a",
+    "explanation": "<p>Proper Noun হলো এমন বিশেষ্য যা নির্দিষ্ট ব্যক্তি, স্থান বা বস্তুর নাম বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) People:</b> 'People' একটি Common Noun, কারণ এটি সাধারণ ব্যক্তিদের বোঝায়।</li><li><b>(B) Karim:</b> 'Karim' একটি Proper Noun, কারণ এটি একটি নির্দিষ্ট নাম।</li><li><b>(C) Sun:</b> 'Sun' একটি Proper Noun, কারণ এটি একটি নির্দিষ্ট নাম।</li><li><b>(D) River:</b> 'River' একটি Common Noun, তবে এটি Proper Noun হতে পারে যদি নির্দিষ্ট নদীর নাম হয়।</li></ul>"
+  },
+  {
+    "id": 139,
+    "question": "Paper, water, iron, gold and milk are-",
+    "options": {
+      "a": "Abstract Nouns",
+      "b": "Material Nouns",
+      "c": "Collective Nouns",
+      "d": "Common Nouns"
+    },
+    "correct": "b",
+    "explanation": "<p>Material Noun হলো এমন বিশেষ্য যা কোনো বস্তু বা পদার্থকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Abstract Nouns:</b> এগুলো গুণ বা ধারণা নয়।</li><li><b>(B) Material Nouns:</b> 'Paper', 'Water', 'Iron', 'Gold', 'Milk' হলো Material Noun, কারণ এগুলো পদার্থ।</li><li><b>(C) Collective Nouns:</b> এগুলো গোষ্ঠী নয়।</li><li><b>(D) Common Nouns:</b> এগুলো সাধারণ নয়, বরং পদার্থ।</li></ul>"
+  },
+  {
+    "id": 140,
+    "question": "What kind of noun the following words belongs to 'love, affection'?",
+    "options": {
+      "a": "Abstract",
+      "b": "Common",
+      "c": "Collective",
+      "d": "Proper"
+    },
+    "correct": "a",
+    "explanation": "<p>Abstract Noun হলো এমন বিশেষ্য যা গুণ, অনুভূতি বা ধারণাকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Abstract:</b> 'Love', 'Affection' হলো Abstract Noun, কারণ এগুলো অনুভূতি বোঝায়।</li><li><b>(B) Common:</b> এগুলো সাধারণ বস্তু বা ব্যক্তি নয়।</li><li><b>(C) Collective:</b> এগুলো গোষ্ঠী নয়।</li><li><b>(D) Proper:</b> এগুলো নির্দিষ্ট নাম নয়।</li></ul>"
+  }
+
+      ];
+
+      const totalQuestions = questions.length;
+      let timeLeft = Math.floor(totalQuestions / 2) * 60;
+      const timerElement = document.getElementById("timer");
+      let timerInterval;
+
+      function updateTimer() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        timerElement.innerText = `${toBengaliNumber(
+          minutes
+        )} মিনিট ${toBengaliNumber(seconds)} সেকেন্ড`;
+
+        if (timeLeft > 0) {
+          timeLeft--;
+        } else {
+          stopTimer();
+          confirmSubmit();
+        }
+      }
+
+      function startTimer() {
+        timerElement.innerText = `${toBengaliNumber(
+          Math.floor(timeLeft / 60)
+        )} মিনিট ${toBengaliNumber(timeLeft % 60)} সেকেন্ড`;
+        timerInterval = setInterval(updateTimer, 1000);
+      }
+
+      function stopTimer() {
+        clearInterval(timerInterval);
+      }
+
+      function toBengaliNumber(num) {
+        const bengaliDigits = [
+          "০",
+          "১",
+          "২",
+          "৩",
+          "৪",
+          "৫",
+          "৬",
+          "৭",
+          "৮",
+          "৯",
+        ];
+        return String(num).replace(/\d/g, (d) => bengaliDigits[d]);
+      }
+
+      function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+      }
+
+      function generateQuestions() {
+        const examContainer = document.querySelector("#exam");
+        examContainer.innerHTML = "";
+        const shuffledQuestions = shuffleArray([...questions]);
+        shuffledQuestions.forEach((question, index) => {
+          const questionDiv = document.createElement("div");
+          questionDiv.classList.add("question-container");
+          questionDiv.setAttribute("data-question", question.id);
+          questionDiv.setAttribute("data-correct", question.correct);
+
+          let optionsHTML = "";
+          for (let option in question.options) {
+            optionsHTML += `
+              <label class="option" data-option="${option}">
+                <div class="circle">${option}</div>
+                <span class="option-text">${question.options[option]}</span>
+              </label>
+            `;
+          }
+
+          const explanationHTML = question.explanation
+            ? `<div class="explanation-dropdown">
+                  <button class="explanation-btn">ব্যাখ্যা দেখো</button>
+                  <div class="explanation-content">
+                    <div class="explanation-label">ব্যাখ্যা:</div>
+                    ${question.explanation}
+                  </div>
+                </div>`
+            : "";
+
+          questionDiv.innerHTML = `
+              <p class="question-label">${index + 1}. ${question.question}</p>
+              <div class="options">
+                ${optionsHTML}
+              </div>
+              ${explanationHTML}
+            `;
+          examContainer.appendChild(questionDiv);
+        });
+
+        document.querySelectorAll(".question-container").forEach((container) => {
+          container.style.display = "block";
+        });
+
+        document.querySelectorAll(".option").forEach((option) => {
+          option.addEventListener(
+            "click",
+            function (e) {
+              e.preventDefault();
+              const parent = this.closest(".question-container");
+              if (parent.classList.contains("locked")) return;
+              parent.classList.add("locked");
+              parent.querySelectorAll(".option").forEach((el) => {
+                if (el !== this) {
+                  el.style.pointerEvents = "none";
+                  el.style.cursor = "default";
+                }
+                el.classList.remove("selected");
+              });
+              this.classList.add("selected");
+            },
+            { once: true }
+          );
+        });
+
+        document.querySelectorAll(".explanation-btn").forEach((btn) => {
+          btn.addEventListener("click", function () {
+            const content = this.nextElementSibling;
+            content.classList.toggle("visible");
+            this.classList.toggle("active");
+          });
+        });
+
+        const examInfo = document.getElementById("exam-info");
+        if (examInfo) {
+          examInfo.innerText = `পূর্ণ নম্বরঃ ${toBengaliNumber(
+            totalQuestions
+          )}`;
+        }
+      }
+
+      function initializeChart() {
+        const ctx = document.getElementById("scoreChart").getContext("2d");
+        chartInstance = new Chart(ctx, {
+          type: "pie",
+          data: {
+            labels: ["ঠিক উত্তর", "ভুল উত্তর", "অনুত্তরিত"],
+            datasets: [
+              {
+                data: [0, 0, 0],
+                backgroundColor: ["#34c759", "#ff3b30", "#007aff"],
+                borderColor: "#fff",
+                borderWidth: 2,
+                hoverOffset: 10,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "10%",
+            layout: {
+              padding: 10,
+            },
+            plugins: {
+              legend: {
+                position: "bottom",
+                labels: {
+                  font: {
+                    family: '"Hind Siliguri", sans-serif',
+                    size: 13,
+                    weight: "bold",
+                  },
+                  color: "#333",
+                  padding: 12,
+                  boxWidth: 14,
+                  generateLabels: (chart) => {
+                    const data = chart.data;
+                    return data.labels.map((label, i) => ({
+                      text: label,
+                      font: {
+                        family: '"Hind Siliguri", sans-serif',
+                      },
+                      fillStyle: data.datasets[0].backgroundColor[i],
+                      hidden: !chart.getDataVisibility(i),
+                      index: i,
+                    }));
+                  },
+                },
+              },
+              tooltip: {
+                backgroundColor: "rgba(0, 0, 0, 0.9)",
+                cornerRadius: 6,
+                titleFont: {
+                  family: '"Hind Siliguri", sans-serif',
+                  size: 14,
+                  weight: "bold",
+                },
+                bodyFont: {
+                  family: '"Hind Siliguri", sans-serif',
+                  size: 13,
+                },
+                padding: 10,
+                boxPadding: 5,
+              },
+            },
+            animation: {
+              animateScale: true,
+              animateRotate: true,
+              duration: 1000,
+              easing: "easeOutQuart",
+            },
+            elements: {
+              arc: {
+                borderRadius: 8,
+              },
+            },
+            onClick: (e, elements) => {
+              if (elements.length > 0) {
+                const index = elements[0].index;
+                const filter = ["correct", "wrong", "unanswered"][index];
+                filterQuestions(filter);
+              } else {
+                filterQuestions("all");
+              }
+            },
+          },
+        });
+      }
+
+      function filterQuestions(type) {
+        document.querySelectorAll(".question-container").forEach((question) => {
+          const status = question.getAttribute("data-status");
+          if (type === "all" || status === type) {
+            question.style.display = "block";
+          } else {
+            question.style.display = "none";
+          }
+        });
+      }
+
+      function showConfirmPopup() {
+        document.getElementById("confirmPopup").style.display = "block";
+      }
+
+      function confirmSubmit() {
+        document.getElementById("confirmPopup").style.display = "none";
+        stopTimer();
+        let score = 0,
+          answered = 0,
+          correct = 0,
+          wrong = 0,
+          unanswered = 0;
+
+        document
+          .querySelectorAll(".question-container")
+          .forEach((question, index) => {
+            let correctAnswer = question.getAttribute("data-correct");
+            let selectedOption = question.querySelector(".option.selected");
+
+            if (selectedOption) {
+              answered++;
+              let chosenAnswer = selectedOption.getAttribute("data-option");
+              if (chosenAnswer === correctAnswer) {
+                selectedOption
+                  .querySelector(".option-text")
+                  .classList.add("correct-text");
+                score += 1;
+                correct++;
+                question.setAttribute("data-status", "correct");
+              } else {
+                selectedOption
+                  .querySelector(".option-text")
+                  .classList.add("incorrect-text");
+                question
+                  .querySelector([data-option="${correctAnswer}"] .option-text)
+                  .classList.add("correct-text");
+                score -= 0.25;
+                wrong++;
+                question.setAttribute("data-status", "wrong");
+              }
+            } else {
+              question
+                .querySelector([data-option="${correctAnswer}"] .option-text)
+                .classList.add("unattempted-text");
+              unanswered++;
+              question.setAttribute("data-status", "unanswered");
+            }
+            question.style.display = "block";
+
+            const explanationDropdown = question.querySelector(
+              ".explanation-dropdown"
+            );
+            if (explanationDropdown) {
+              explanationDropdown.classList.add("visible");
+            }
+          });
+
+        const chartContainer = document.querySelector(".chart-container");
+        chartContainer.classList.add("visible");
+        if (!chartInstance) {
+          initializeChart();
+        }
+        chartInstance.data.datasets[0].data = [correct, wrong, unanswered];
+        chartInstance.update();
+
+        document.getElementById("totalQuestions").innerText =
+          toBengaliNumber(totalQuestions);
+        document.getElementById("answered").innerText = toBengaliNumber(answered);
+        document.getElementById("correctAnswers").innerText =
+          toBengaliNumber(correct);
+        document.getElementById("wrongAnswers").innerText = toBengaliNumber(wrong);
+        document.getElementById("unanswered").innerText =
+          toBengaliNumber(unanswered);
+        document.getElementById("finalScore").innerText = toBengaliNumber(
+          score.toFixed(2)
+        );
+        document.getElementById("popupSerial").innerText = serialNumber;
+
+        document.getElementById("formSerialNumber").value = serialNumber;
+        document.getElementById("formFinalScore").value = score.toFixed(2);
+        document.getElementById("formCorrectAnswers").value = correct;
+        document.getElementById("formWrongAnswers").value = wrong;
+        document.getElementById("formUnanswered").value = unanswered;
+        document.getElementById("formSubmissionTime").value =
+          new Date().toISOString();
+        document.querySelector("#scoreForm input[name='actionType']").value =
+          "exam_submit";
+
+        document.getElementById("submitBtn").style.display = "none";
+        document.getElementById("scorePopup").style.display = "block";
+      }
+
+      function cancelSubmit() {
+        document.getElementById("confirmPopup").style.display = "none";
+      }
+
+      function showErrorPopup() {
+        document.getElementById("errorPopup").style.display = "block";
+      }
+
+      function closeErrorPopup() {
+        document.getElementById("errorPopup").style.display = "none";
+      }
+
+      document
+        .getElementById("scoreForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+          const form = this;
+          const formData = new FormData(form);
+          const url = form.action;
+
+          // Send data in the background using fetch
+          fetch(url, {
+            method: "POST",
+            body: formData,
+            headers: {
+              Accept: "application/json",
+            },
+          })
+            .then((response) => {
+              if (response.ok) {
+                console.log("Form submitted successfully");
+              } else {
+                console.error("Form submission failed:", response.statusText);
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+
+          closePopup();
+        });
+
+      function closePopup() {
+        const scorePopup = document.getElementById("scorePopup");
+        scorePopup.classList.add("slide-out");
+        setTimeout(() => {
+          scorePopup.style.display = "none";
+          scorePopup.classList.remove("slide-out");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }, 500);
+      }
+    </script>
+  </body>
+</html>
