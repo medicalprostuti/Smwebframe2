@@ -1202,7 +1202,7 @@ shad
               }
             } else {
               question
-                .querySelector([data-option="${correctAnswer}"] .option-text)
+                question.querySelector(`[data-option="${correctAnswer}"] .option-text`)
                 .classList.add("unattempted-text");
               unanswered++;
               question.setAttribute("data-status", "unanswered");
