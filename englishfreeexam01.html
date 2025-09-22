@@ -149,16 +149,15 @@
         color: orange !important;
       }
 
-      /* Updated CSS for submit button */
       .button-container {
         display: flex;
         justify-content: center;
         width: 100%;
-        margin-top: 20px; /* Added margin-top to separate from questions */
+        margin-top: 20px;
       }
 
       #submitBtn {
-        font-family: hind siliguri;
+        font-family: "Hind Siliguri", sans-serif;
         padding: 15px 30px;
         background-color: #1b0b54;
         color: white;
@@ -214,7 +213,7 @@
       }
 
       .confirm-btn {
-        font-family: hind siliguri;
+        font-family: "Hind Siliguri", sans-serif;
         background-color: #34c759;
         color: white;
         padding: 8px 15px;
@@ -334,7 +333,6 @@
         cursor: default;
       }
 
-      /* Updated CSS for serial number input section */
       .serial-input-container {
         display: flex;
         flex-direction: column;
@@ -358,16 +356,15 @@
         border-radius: 5px;
         border: 1px solid #ccc;
         margin-bottom: 15px;
-        font-family: "Hind Siliguri", sans-serif; /* Added font-family */
+        font-family: "Hind Siliguri", sans-serif;
       }
 
       .serial-input-container input::placeholder {
-        font-family: "Hind Siliguri", sans-serif; /* Added font-family to placeholder */
+        font-family: "Hind Siliguri", sans-serif;
       }
 
-      /* New styling for start exam button */
       #startExamBtn {
-        font-family: hind siliguri;
+        font-family: "Hind Siliguri", sans-serif;
         padding: 12px 25px;
         background-color: #1b0b54;
         color: white;
@@ -375,7 +372,7 @@
         cursor: pointer;
         font-size: 16px;
         border-radius: 8px;
-        width: 150px; /* Reduced width */
+        width: 150px;
         transition: background-color 0.3s ease;
       }
 
@@ -383,17 +380,16 @@
         background-color: #1b0b54;
       }
 
-      /* Updated CSS for error popup */
       #errorPopup {
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Reduced shadow */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
       }
       #errorPopup .popup-body {
-        min-height: unset; /* Ensure height is minimal */
-        padding-bottom: 10px; /* Adjust padding as needed */
+        min-height: unset;
+        padding-bottom: 10px;
       }
       #errorPopup .popup-body p {
         margin-top: 0;
-        margin-bottom: 15px; /* Adjust margin as needed */
+        margin-bottom: 15px;
       }
     </style>
   </head>
@@ -417,8 +413,7 @@
           <div class="chart-container">
             <canvas id="scoreChart"></canvas>
           </div>
-          <div id="exam">
-            </div>
+          <div id="exam"></div>
           <div class="button-container">
             <button id="submitBtn">সাবমিট</button>
           </div>
@@ -513,7 +508,7 @@
         const serialNumberInput = document.getElementById("serialNumberInput");
         const inputSerial = serialNumberInput.value.trim();
 
-        if (inputSerial.length !== 5 || isNaN(inputSerial)) {
+        if (inputSerial.length !== 5 || !/^\d{5}$/.test(inputSerial)) {
           showErrorPopup();
           return;
         }
@@ -521,14 +516,12 @@
         serialNumber = inputSerial;
         examStartTime = new Date().toISOString();
 
-        // Send start time data to Formspree in the background
         sendFormspreeData({
           serialNumber: serialNumber,
           actionType: "exam_start",
           startTime: examStartTime,
         });
 
-        // Hide serial input and show exam content
         document.getElementById("serialInputContainer").style.display = "none";
         document.getElementById("examContentArea").style.display = "block";
 
@@ -546,382 +539,422 @@
       }
 
       const questions = [
-       
-  {
-    "id": 109,
-    "question": "কোনটি Abstract Noun?",
-    "options": {
-      "a": "Long",
-      "b": "Height (হাইট)",
-      "c": "Man",
-      "d": "Jury"
-    },
-    "correct": "b",
-    "explanation": "<p>Abstract Noun হলো এমন একটি বিশেষ্য যা স্পর্শ করা বা দেখা যায় না, বরং এটি অনুভূতি, গুণ, অবস্থা বা ধারণাকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Long:</b> 'Long' একটি বিশেষণ (Adjective), যা দৈর্ঘ্য বোঝায়। এটি সরাসরি Abstract Noun নয়, তবে এর Abstract Noun রূপ হলো 'Length'।</li><li><b>(B) Height:</b> 'Height' (উচ্চতা) একটি Abstract Noun, কারণ এটি একটি পরিমাপ বা গুণ বোঝায় যা স্পর্শ করা যায় না।</li><li><b>(C) Man:</b> 'Man' একটি Common Noun, কারণ এটি একটি ব্যক্তি বা জাতিকে বোঝায়।</li><li><b>(D) Jury:</b> 'Jury' একটি Collective Noun, কারণ এটি একটি গোষ্ঠী বা দলকে বোঝায়।</li></ul>"
-  },
-  {
-    "id": 110,
-    "question": "নিচের কোনটি Abstract Noun এর উদাহরণ?",
-    "options": {
-      "a": "Child",
-      "b": "Boy",
-      "c": "Family",
-      "d": "Childhood"
-    },
-    "correct": "d",
-    "explanation": "<p>Abstract Noun হলো এমন বিশেষ্য যা কোনো গুণ, অবস্থা বা ধারণাকে বোঝায় এবং যা স্পর্শ করা যায় না।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Child:</b> 'Child' একটি Common Noun, কারণ এটি একটি ব্যক্তিকে বোঝায়।</li><li><b>(B) Boy:</b> 'Boy'ও একটি Common Noun, কারণ এটি একটি নির্দিষ্ট লিঙ্গের ব্যক্তিকে বোঝায়।</li><li><b>(C) Family:</b> 'Family' একটি Collective Noun, কারণ এটি একটি গোষ্ঠীকে বোঝায়।</li><li><b>(D) Childhood:</b> 'Childhood' একটি Abstract Noun, কারণ এটি একটি অবস্থা বা সময়কাল বোঝায় যা স্পর্শ করা যায় না।</li></ul>"
-  },
-  {
-    "id": 112,
-    "question": "Abstract noun of the word 'Long' is-",
-    "options": {
-      "a": "Length",
-      "b": "Longer",
-      "c": "Lengthier",
-      "d": "Lengthen"
-    },
-    "correct": "a",
-    "explanation": "<p>Abstract Noun হলো এমন বিশেষ্য যা কোনো গুণ বা পরিমাপকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Length:</b> 'Length' হলো 'Long' শব্দের Abstract Noun, কারণ এটি দৈর্ঘ্য নামক গুণ বা পরিমাপ বোঝায়।</li><li><b>(B) Longer:</b> 'Longer' একটি তুলনামূলক বিশেষণ (Comparative Adjective)।</li><li><b>(C) Lengthier:</b> 'Lengthier'ও একটি তুলনামূলক বিশেষণ।</li><li><b>(D) Lengthen:</b> 'Lengthen' একটি ক্রিয়া (Verb), যা দৈর্ঘ্য বাড়ানো বোঝায়।</li></ul>"
-  },
-  {
-    "id": 113,
-    "question": "The best word stands for Abstract noun is-",
-    "options": {
-      "a": "Beauty",
-      "b": "Boat",
-      "c": "Sail",
-      "d": "Bird"
-    },
-    "correct": "a",
-    "explanation": "<p>Abstract Noun হলো এমন বিশেষ্য যা কোনো গুণ, অনুভূতি বা ধারণাকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Beauty:</b> 'Beauty' একটি Abstract Noun, কারণ এটি একটি গুণ বোঝায় যা দেখা বা স্পর্শ করা যায় না।</li><li><b>(B) Boat:</b> 'Boat' একটি Common Noun, কারণ এট একটি বস্তু।</li><li><b>(C) Sail:</b> 'Sail' একটি Common Noun, কারণ এটি একটি বস্তু বা ক্রিয়া হিসেবে ব্যবহৃত হয়।</li><li><b>(D) Bird:</b> 'Bird' একটি Common Noun, কারণ এটি একটি প্রাণীকে বোঝায়।</li></ul>"
-  },
-  {
-    "id": 114,
-    "question": "Iron is a useful metal. এখানে 'Iron' শব্দটি কোন প্রকারের Noun?",
-    "options": {
-      "a": "Proper Noun",
-      "b": "Material Noun",
-      "c": "Collective Noun",
-      "d": "Common Noun"
-    },
-    "correct": "b anniversary",
-    "explanation": "<p>Material Noun হলো এমন বিশেষ্য যা কোনো বস্তুকে বোঝায় যা স্পর্শ করা যায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Proper Noun:</b> 'Iron' একটি নির্দিষ্ট নাম নয়, তাই এটি Proper Noun নয়।</li><li><b>(B) Material Noun:</b> 'Iron' একটি Material Noun, কারণ এটি একটি বস্তু বা পদার্থ বোঝায়।</li><li><b>(C) Collective Noun:</b> 'Iron' একটি গোষ্ঠী নয়, তাই এটি Collective Noun নয়।</li><li><b>(D) Common Noun:</b> 'Iron' সাধারণভাবে একটি ধাতুকে বোঝায়, তাই এটি Common Noun নয়।</li></ul>"
-  },
-  {
-    "id": 115,
-    "question": "নিম্নের কোনটি Abstract Noun নয়?",
-    "options": {
-      "a": "Air",
-      "b": "Goodwill",
-      "c": "Flavour",
-      "d": "Water"
-    },
-    "correct": "a",
-    "explanation": "<p>Abstract Noun হলো এমন বিশেষ্য যা অনুভূতি, গুণ বা ধারণাকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Air:</b> 'Air' একটি Material Noun, কারণ এটি একটি বস্তু বা পদার্থ বোঝায়।</li><li><b>(B) Goodwill:</b> 'Goodwill' একটি Abstract Noun, কারণ এটি একটি গুণ বা ধারণা।</li><li><b>(C) Flavour:</b> 'Flavour' একটি Abstract Noun, কারণ এটি একটি গুণ।</li><li><b>(D) Water:</b> 'Water' একটি Material Noun, কারণ এটি একটি পদার্থ।</li></ul>"
-  },
-  {
-    "id": 116,
-    "question": "'I saw a flock of sheep,' বাক্যে 'flock' শব্দটি কোন প্রকারের Noun?",
-    "options": {
-      "a": "Proper Noun",
-      "b": "Common Noun",
-      "c": "Collective Noun",
-      "d": "Material Noun"
-    },
-    "correct": "c",
-    "explanation": "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Proper Noun:</b> 'Flock' কোনো নির্দিষ্ট নাম নয়।</li><li><b>(B) Common Noun:</b> 'Flock' সাধারণভাবে একটি বস্তু নয়, বরং একটি গোষ্ঠী বোঝায়।</li><li><b>(C) Collective Noun:</b> 'Flock' একটি Collective Noun, কারণ এটি ভেড়ার দল বোঝায়।</li><li><b>(D) Material Noun:</b> 'Flock' কোনো পদার্থ নয়।</li></ul>"
-  },
-  {
-    "id": 117,
-    "question": "Our team is better than yours. বাক্যে 'Team' শব্দটি কোন প্রকারের Noun?",
-    "options": {
-      "a": "Common Noun",
-      "b": "Collective Noun",
-      "c": "Material Noun",
-      "d": "Abstract Noun"
-    },
-    "correct": "b",
-    "explanation": "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Common Noun:</b> 'Team' সাধারণভাবে একটি বস্তু নয়, বরং একটি গোষ্ঠী বোঝায়।</li><li><b>(B) Collective Noun:</b> 'Team' একটি Collective Noun, কারণ এটি একটি দল বোঝায়।</li><li><b>(C) Material Noun:</b> 'Team' কোনো পদার্থ নয়।</li><li><b>(D) Abstract Noun:</b> 'Team' কোনো গুণ বা ধারণা নয়।</li></ul>"
-  },
-  {
-    "id": 118,
-    "question": "Which group of words are Collective Nouns?",
-    "options": {
-      "a": "Sajib, America",
-      "b": "Water, Milk, Steel",
-      "c": "Cattle, Army, Class",
-      "d": "Unity, Health, Poverty"
-    },
-    "correct": "c",
-    "explanation": "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Sajib, America:</b> 'Sajib' ও 'America' হলো Proper Noun।</li><li><b>(B) Water, Milk, Steel:</b> এগুলো Material Noun।</li><li><b>(C) Cattle, Army, Class:</b> এগুলো Collective Noun, কারণ এরা গোষ্ঠী বোঝায়।</li><li><b>(D) Unity, Health, Poverty:</b> এগুলো Abstract Noun, কারণ এরা গুণ বা ধারণা বোঝায়।</li></ul>"
-  },
-  {
-    "id": 119,
-    "question": "কোনটি Abstract Noun?",
-    "options": {
-      "a": "Elephant",
-      "b": "Harbour",
-      "c": "Strength",
-      "d": "Dhaka"
-    },
-    "correct": "c",
-    "explanation": "<p>Abstract Noun হলো এমন বিশেষ্য যা গুণ, অনুভূতি বা ধারণাকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Elephant:</b> 'Elephant' একটি Common Noun, কারণ এটি একটি প্রাণী।</li><li><b>(B) Harbour:</b> 'Harbour' একটি Common Noun, কারণ এটি একটি স্থান।</li><li><b>(C) Strength:</b> 'Strength' একটি Abstract Noun, কারণ এটি একটি গুণ।</li><li><b>(D) Dhaka:</b> 'Dhaka' একটি Proper Noun, কারণ এটি একটি নির্দিষ্ট স্থানের নাম।</li></ul>"
-  },
-  {
-    "id": 120,
-    "question": "কোনটি Common Noun?",
-    "options": {
-      "a": "February",
-      "b": "Jute",
-      "c": "Month",
-      "d": "Class"
-    },
-    "correct": "c",
-    "explanation": "<p>Common Noun হলো এমন বিশেষ্য যা সাধারণ বস্তু, ব্যক্তি বা স্থানকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) February:</b> 'February' একটি Proper Noun, কারণ এটি একটি নির্দিষ্ট মাসের নাম।</li><li><b>(B) Jute:</b> 'Jute' একটি Material Noun, কারণ এটি একটি পদার্থ।</li><li><b>(C) Month:</b> 'Month' একটি Common Noun, কারণ এটি সাধারণভাবে মাস বোঝায়।</li><li><b>(D) Class:</b> 'Class' একটি Collective Noun, কারণ এটি একটি গোষ্ঠী বোঝায়।</li></ul>"
-  },
-  {
-    "id": 121,
-    "question": "কোনটি Collective Noun?",
-    "options": {
-      "a": "Boy",
-      "b": "Books",
-      "c": "Library",
-      "d": "Mouth"
-    },
-    "correct": "c",
-    "explanation": "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Boy:</b> 'Boy' একটি Common Noun, কারণ এটি একটি ব্যক্তি।</li><li><b>(B) Books:</b> 'Books' একটি Common Noun, কারণ এটি বস্তু।</li><li><b>(C) Library:</b> 'Library' একটি Collective Noun, কারণ এটি বইয়ের সমষ্টি বোঝায়।</li><li><b>(D) Mouth:</b> 'Mouth' একটি Common Noun, কারণ এটি শরীরের একটি অংশ।</li></ul>"
-  },
-  {
-    "id": 122,
-    "question": "What kind of noun is 'Dhaka'?",
-    "options": {
-      "a": "Proper",
-      "b": "Common",
-      "c": "Collective",
-      "d": "Material"
-    },
-    "correct": "a",
-    "explanation": "<p>Proper Noun হলো এমন বিশেষ্য যা নির্দিষ্ট ব্যক্তি, স্থান বা বস্তুর নাম বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Proper:</b> 'Dhaka' একটি Proper Noun, কারণ এটি একটি নির্দিষ্ট স্থানের নাম।</li><li><b>(B) Common:</b> 'Dhaka' সাধারণ নয়, তাই Common Noun নয়।</li><li><b>(C) Collective:</b> 'Dhaka' কোনো গোষ্ঠী নয়।</li><li><b>(D) Material:</b> 'Dhaka' কোনো পদার্থ নয়।</li></ul>"
-  },
-  {
-    "id": 123,
-    "question": "Which one of the following is an example of Proper Noun?",
-    "options": {
-      "a": "The police",
-      "b": "Car",
-      "c": "Bangladesh",
-      "d": "Family"
-    },
-    "correct": "c",
-    "explanation": "<p>Proper Noun হলো এমন বিশেষ্য যা নির্দিষ্ট ব্যক্তি, স্থান বা বস্তুর নাম বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) The police:</b> 'Police' একটি Collective Noun।</li><li><b>(B) Car:</b> 'Car' একটি Common Noun।</li><li><b>(C) Bangladesh:</b> 'Bangladesh' একটি Proper Noun, কারণ এটি একটি নির্দিষ্ট দেশের নাম।</li><li><b>(D) Family:</b> 'Family' একটি Collective Noun।</li></ul>"
-  },
-  {
-    "id": 124,
-    "question": "Flock is a-",
-    "options": {
-      "a": "Proper Noun",
-      "b": "Common Noun",
-      "c": "Collective Noun",
-      "d": "Abstract Noun"
-    },
-    "correct": "c",
-    "explanation": "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Proper Noun:</b> 'Flock' কোনো নির্দিষ্ট নাম নয়।</li><li><b>(B) Common Noun:</b> 'Flock' সাধারণ বস্তু নয়, বরং একটি গোষ্ঠী।</li><li><b>(C) Collective Noun:</b> 'Flock' একটি Collective Noun, কারণ এটি পশুদের দল বোঝায়।</li><li><b>(D) Abstract Noun:</b> 'Flock' কোনো গুণ বা ধারণা নয়।</li></ul>"
-  },
-  {
-    "id": 125,
-    "question": "What kind of noun is 'journey'?",
-    "options": {
-      "a": "Common",
-      "b": "Collective",
-      "c": "Proper",
-      "d": "Abstract"
-    },
-    "correct": "a",
-    "explanation": "<p>Common Noun হলো এমন বিশেষ্য যা সাধারণ বস্তু, ব্যক্তি বা ধারণাকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Common:</b> 'Journey' একটি Common Noun, কারণ এটি একটি সাধারণ ধারণা বা কাজ বোঝায়।</li><li><b>(B) Collective:</b> 'Journey' কোনো গোষ্ঠী নয়।</li><li><b>(C) Proper:</b> 'Journey' কোনো নির্দিষ্ট নাম নয়।</li><li><b>(D) Abstract:</b> 'Journey' একটি ক্রিয়া বা অভিজ্ঞতা হলেও এটি সাধারণত Common Noun হিসেবে বিবেচিত হ彼此</li></ul>"
-  },
-  {
-    "id": 126,
-    "question": "Find the collective noun from the following:",
-    "options": {
-      "a": "Water",
-      "b": "Cow",
-      "c": "Kindness",
-      "d": "Army"
-    },
-    "correct": "d",
-    "explanation": "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Water:</b> 'Water' একটি Material Noun।</li><li><b>(B) Cow:</b> 'Cow' একটি Common Noun।</li><li><b>(C) Kindness:</b> 'Kindness' একটি Abstract Noun।</li><li><b>(D) Army:</b> 'Army' একটি Collective Noun, কারণ এটি একটি গোষ্ঠী বোঝায়।</li></ul>"
-  },
-  {
-    "id": 127,
-    "question": "Which of the following words is not similar to 'school'?",
-    "options": {
-      "a": "Flock",
-      "b": "Herd",
-      "c": "College",
-      "d": "Pack"
-    },
-    "correct": "c",
-    "explanation": "<p>'School' একটি Collective Noun, যা একটি গোষ্ঠী বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Flock:</b> 'Flock' একটি Collective Noun, যা পশুদের দল বোঝায়।</li><li><b>(B) Herd:</b> 'Herd' একটি Collective Noun, যা পশুদের দল বোঝায়।</li><li><b>(C) College:</b> 'College' একটি Common Noun, কারণ এটি একটি সাধারণ স্থান বোঝায়।</li><li><b>(D) Pack:</b> 'Pack' একটি Collective Noun, যা পশুদের দল বোঝায়।</li></ul>"
-  },
-  {
-    "id": 128,
-    "question": "Which one of the following is a Common Noun?",
-    "options": {
-      "a": "Pirate",
-      "b": "Humility",
-      "c": "Roguery",
-      "d": "Straw"
-    },
-    "correct": "a",
-    "explanation": "<p>Common Noun হলো এমন বিশেষ্য যা সাধারণ বস্তু, ব্যক্তি বা স্থানকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Pirate:</b> 'Pirate' একটি Common Noun, কারণ এটি একটি সাধারণ ব্যক্তি বোঝায়।</li><li><b>(B) Humility:</b> 'Humility' একটি Abstract Noun, কারণ এটি একটি গুণ।</li><li><b>(C) Roguery:</b> 'Roguery' একটি Abstract Noun, কারণ এটি একটি গুণ।</li><li><b>(D) Straw:</b> 'Straw' একটি Material Noun, কারণ এটি একটি পদার্থ।</li></ul>"
-  },
-  {
-    "id": 129,
-    "question": "Water has no colour of its own. What type of noun the underlined word is?",
-    "options": {
-      "a": "Common",
-      "b": "Abstract",
-      "c": "Proper",
-      "d": "Material"
-    },
-    "correct": "d",
-    "explanation": "<p>Material Noun হলো এমন বিশেষ্য যা কোনো বস্তু বা পদার্থকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Common:</b> 'Water' সাধারণ নয়, বরং একটি পদার্থ।</li><li><b>(B) Abstract:</b> 'Water' কোনো গুণ বা ধারণা নয়।</li><li><b>(C) Proper:</b> 'Water' কোনো নির্দিষ্ট নাম নয়।</li><li><b>(D) Material:</b> 'Water' একটি Material Noun, কারণ এটি একটি পদার্থ।</li></ul>"
-  },
-  {
-    "id": 130,
-    "question": "What kind of noun is 'Infant'?",
-    "options": {
-      "a": "Proper",
-      "b": "Common",
-      "c": "Material",
-      "d": "Collective"
-    },
-    "correct": "b",
-    "explanation": "<p>Common Noun হলো এমন বিশেষ্য যা সাধারণ বস্তু, ব্যক্তি বা স্থানকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Proper:</b> 'Infant' কোনো নির্দিষ্ট নাম নয়।</li><li><b>(B) Common:</b> 'Infant' একটি Common Noun, কারণ এটি একটি সাধারণ ব্যক্তি বোঝায়।</li><li><b>(C) Material:</b> 'Infant' কোনো পদার্থ নয়।</li><li><b>(D) Collective:</b> 'Infant' কোনো গোষ্ঠী নয়।</li></ul>"
-shad
-  },
-  {
-    "id": 131,
-    "question": "The word 'hatred (হেইট্রিড-ঘৃণা)' is noun.",
-    "options": {
-      "a": "Abstract",
-      "b": "Proper",
-      "c": "Collective",
-      "d": "Material"
-    },
-    "correct": "a",
-    "explanation": "<p>Abstract Noun হলো এমন বিশেষ্য যা অনুভূতি, গুণ বা ধারণাকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Abstract:</b> 'Hatred' একটি Abstract Noun, কারণ এটি একটি অনুভূতি বোঝায়।</li><li><b>(B) Proper:</b> 'Hatred' কোনো নির্দিষ্ট নাম নয়।</li><li><b>(C) Collective:</b> 'Hatred' কোনো গোষ্ঠী নয়।</li><li><b>(D) Material:</b> 'Hatred' কোনো পদার্থ নয়।</li></ul>"
-  },
-  {
-    "id": 132,
-    "question": "'Love', 'courage' and 'childhood' are examples of-",
-    "options": {
-      "a": "Proper Nouns",
-      "b": "Abstract Nouns",
-      "c": "Countable Nouns",
-      "d": "Common Nouns"
-    },
-    "correct": "b",
-    "explanation": "<p>Abstract Noun হলো এমন বিশেষ্য যা গুণ, অনুভূতি বা ধারণাকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Proper Nouns:</b> এগুলো নির্দিষ্ট নাম নয়।</li><li><b>(B) Abstract Nouns:</b> 'Love', 'Courage', 'Childhood' হলো Abstract Noun, কারণ এগুলো অনুভূতি ও অবস্থা বোঝায়।</li><li><b>(C) Countable Nouns:</b> এগুলো গণনাযোগ্য হলেও প্রধানত Abstract Noun।</li><li><b>(D) Common Nouns:</b> এগুলো সাধারণ বস্তু বা ব্যক্তি নয়।</li></ul>"
-  },
-  {
-    "id": 133,
-    "question": "Which noun below is a Collective Noun?",
-    "options": {
-      "a": "Men",
-      "b": "Duck",
-      "c": "Family",
-      "d": "Children"
-    },
-    "correct": "c",
-    "explanation": "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Men:</b> 'Men' একটি Common Noun, কারণ এটি ব্যক্তিদের বোঝায়।</li><li><b>(B) Duck:</b> 'Duck' একটি Common Noun, কারণ এটি একটি প্রাণী।</li><li><b>(C) Family:</b> 'Family' একটি Collective Noun, কারণ এটি একটি গোষ্ঠী বোঝায়।</li><li><b>(D) Children:</b> 'Children' একটি Common Noun, কারণ এটি ব্যক্তিদের বোঝায়।</li></ul>"
-  },
-  {
-    "id": 134,
-    "question": "An enormous _____ of locusts ate all of the crops.",
-    "options": {
-      "a": "Swarm",
-      "b": "Bunch",
-      "c": "Herd",
-      "d": "Bevy",
-      "e": "School"
-    },
-    "correct": "a",
-    "explanation": "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Swarm:</b> 'Swarm' একটি Collective Noun, কারণ এটি পোকামাকড়ের দল বোঝায়।</li><li><b>(B) Bunch:</b> 'Bunch' একটি Collective Noun, কিন্তু পোকামাকড়ের জন্য ব্যবহৃত হয় না।</li><li><b>(C) Herd:</b> 'Herd' পশুদের দলের জন্য ব্যবহৃত হয়।</li><li><b>(D) Bevy:</b> 'Bevy' পাখিদের দলের জন্য ব্যবহৃত হয়।</li><li><b>(E) School:</b> 'School' মাছের দলের জন্য ব্যবহৃত হয়।</li></ul>"
-  },
-  {
-    "id": 135,
-    "question": "A _____ of banknotes.",
-    "options": {
-      "a": "Bunch",
-      "b": "Wad",
-      "c": "Hatch",
-      "d": "Group"
-    },
-    "correct": "b",
-    "explanation": "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Bunch:</b> 'Bunch' একটি Collective Noun, কিন্তু টাকার জন্য সাধারণত ব্যবহৃত হয় না।</li><li><b>(B) Wad:</b> 'Wad' একটি Collective Noun, যা টাকার গোষ্ঠী বোঝায়।</li><li><b>(C) Hatch:</b> 'Hatch' ডিমের গোষ্ঠী বোঝায়।</li><li><b>(D) Group:</b> 'Group' একটি Collective Noun, কিন্তু টাকার জন্য 'Wad' বেশি উপযুক্ত।</li></ul>"
-  },
-  {
-    "id": 136,
-    "question": "A _____ of fish.",
-    "options": {
-      "a": "Flock",
-      "b": "Group",
-      "c": "School",
-      "d": "Fleet"
-    },
-    "correct": "c",
-    "explanation": "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Flock:</b> 'Flock' পাখি বা ভেড়ার দলের জন্য ব্যবহৃত হয়।</li><li><b>(B) Group:</b> 'Group' একটি সাধারণ Collective Noun, কিন্তু মাছের জন্য 'School' বেশি উপযুক্ত।</li><li><b>(C) School:</b> 'School' একটি Collective Noun, যা মাছের দল বোঝায়।</li><li><b>(D) Fleet:</b> 'Fleet' জাহাজের দলের জন্য ব্যবহৃত হয়।</li></ul>"
-  },
-  {
-    "id": 137,
-    "question": "Which of the following is an Abstract Noun?",
-    "options": {
-      "a": "People",
-      "b": "Honesty",
-      "c": "Sun",
-      "d": "River"
-    },
-    "correct": "b",
-    "explanation": "<p>Abstract Noun হলো এমন বিশেষ্য যা গুণ, অনুভূতি বা ধারণাকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) People:</b> 'People' একটি Common Noun।</li><li><b>(B) Honesty:</b> 'Honesty' একটি Abstract Noun, কারণ এটি একটি গুণ।</li><li><b>(C) Sun:</b> 'Sun' একটি Proper Noun।</li><li><b>(D) River:</b> 'River' একটি Common Noun।</li></ul>"
-  },
-  {
-    "id": 138,
-    "question": "Which is not Proper Noun?",
-    "options": {
-      "a": "People",
-      "b": "Karim",
-      "c": "Sun",
-      "d": "River"
-    },
-    "correct": "a",
-    "explanation": "<p>Proper Noun হলো এমন বিশেষ্য যা নির্দিষ্ট ব্যক্তি, স্থান বা বস্তুর নাম বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) People:</b> 'People' একটি Common Noun, কারণ এটি সাধারণ ব্যক্তিদের বোঝায়।</li><li><b>(B) Karim:</b> 'Karim' একটি Proper Noun, কারণ এটি একটি নির্দিষ্ট নাম।</li><li><b>(C) Sun:</b> 'Sun' একটি Proper Noun, কারণ এটি একটি নির্দিষ্ট নাম।</li><li><b>(D) River:</b> 'River' একটি Common Noun, তবে এটি Proper Noun হতে পারে যদি নির্দিষ্ট নদীর নাম হয়।</li></ul>"
-  },
-  {
-    "id": 139,
-    "question": "Paper, water, iron, gold and milk are-",
-    "options": {
-      "a": "Abstract Nouns",
-      "b": "Material Nouns",
-      "c": "Collective Nouns",
-      "d": "Common Nouns"
-    },
-    "correct": "b",
-    "explanation": "<p>Material Noun হলো এমন বিশেষ্য যা কোনো বস্তু বা পদার্থকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Abstract Nouns:</b> এগুলো গুণ বা ধারণা নয়।</li><li><b>(B) Material Nouns:</b> 'Paper', 'Water', 'Iron', 'Gold', 'Milk' হলো Material Noun, কারণ এগুলো পদার্থ।</li><li><b>(C) Collective Nouns:</b> এগুলো গোষ্ঠী নয়।</li><li><b>(D) Common Nouns:</b> এগুলো সাধারণ নয়, বরং পদার্থ।</li></ul>"
-  },
-  {
-    "id": 140,
-    "question": "What kind of noun the following words belongs to 'love, affection'?",
-    "options": {
-      "a": "Abstract",
-      "b": "Common",
-      "c": "Collective",
-      "d": "Proper"
-    },
-    "correct": "a",
-    "explanation": "<p>Abstract Noun হলো এমন বিশেষ্য যা গুণ, অনুভূতি বা ধারণাকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Abstract:</b> 'Love', 'Affection' হলো Abstract Noun, কারণ এগুলো অনুভূতি বোঝায়।</li><li><b>(B) Common:</b> এগুলো সাধারণ বস্তু বা ব্যক্তি নয়।</li><li><b>(C) Collective:</b> এগুলো গোষ্ঠী নয়।</li><li><b>(D) Proper:</b> এগুলো নির্দিষ্ট নাম নয়।</li></ul>"
-  }
+        {
+          id: 109,
+          question: "কোনটি Abstract Noun?",
+          options: {
+            a: "Long",
+            b: "Height (হাইট)",
+            c: "Man",
+            d: "Jury",
+          },
+          correct: "b",
+          explanation:
+            "<p>Abstract Noun হলো এমন একটি বিশেষ্য যা স্পর্শ করা বা দেখা যায় না, বরং এটি অনুভূতি, গুণ, অবস্থা বা ধারণাকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Long:</b> 'Long' একটি বিশেষণ (Adjective), যা দৈর্ঘ্য বোঝায়। এটি সরাসরি Abstract Noun নয়, তবে এর Abstract Noun রূপ হলো 'Length'।</li><li><b>(B) Height:</b> 'Height' (উচ্চতা) একটি Abstract Noun, কারণ এটি একটি পরিমাপ বা গুণ বোঝায় যা স্পর্শ করা যায় না।</li><li><b>(C) Man:</b> 'Man' একটি Common Noun, কারণ এটি একটি ব্যক্তি বা জাতিকে বোঝায়।</li><li><b>(D) Jury:</b> 'Jury' একটি Collective Noun, কারণ এটি একটি গোষ্ঠী বা দলকে বোঝায়।</li></ul>",
+        },
+        {
+          id: 110,
+          question: "নিচের কোনটি Abstract Noun এর উদাহরণ?",
+          options: {
+            a: "Child",
+            b: "Boy",
+            c: "Family",
+            d: "Childhood",
+          },
+          correct: "d",
+          explanation:
+            "<p>Abstract Noun হলো এমন বিশেষ্য যা কোনো গুণ, অবস্থা বা ধারণাকে বোঝায় এবং যা স্পর্শ করা যায় না।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Child:</b> 'Child' একটি Common Noun, কারণ এটি একটি ব্যক্তিকে বোঝায়।</li><li><b>(B) Boy:</b> 'Boy'ও একটি Common Noun, কারণ এটি একটি নির্দিষ্ট লিঙ্গের ব্যক্তিকে বোঝায়।</li><li><b>(C) Family:</b> 'Family' একটি Collective Noun, কারণ এটি একটি গোষ্ঠীকে বোঝায়।</li><li><b>(D) Childhood:</b> 'Childhood' একটি Abstract Noun, কারণ এটি একটি অবস্থা বা সময়কাল বোঝায় যা স্পর্শ করা যায় না।</li></ul>",
+        },
+        {
+          id: 112,
+          question: "Abstract noun of the word 'Long' is-",
+          options: {
+            a: "Length",
+            b: "Longer",
+            c: "Lengthier",
+            d: "Lengthen",
+          },
+          correct: "a",
+          explanation:
+            "<p>Abstract Noun হলো এমন বিশেষ্য যা কোনো গুণ বা পরিমাপকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Length:</b> 'Length' হলো 'Long' শব্দের Abstract Noun, কারণ এটি দৈর্ঘ্য নামক গুণ বা পরিমাপ বোঝায়।</li><li><b>(B) Longer:</b> 'Longer' একটি তুলনামূলক বিশেষণ (Comparative Adjective)।</li><li><b>(C) Lengthier:</b> 'Lengthier'ও একটি তুলনামূলক বিশেষণ।</li><li><b>(D) Lengthen:</b> 'Lengthen' একটি ক্রিয়া (Verb), যা দৈর্ঘ্য বাড়ানো বোঝায়।</li></ul>",
+        },
+        {
+          id: 113,
+          question: "The best word stands for Abstract noun is-",
+          options: {
+            a: "Beauty",
+            b: "Boat",
+            c: "Sail",
+            d: "Bird",
+          },
+          correct: "a",
+          explanation:
+            "<p>Abstract Noun হলো এমন বিশেষ্য যা কোনো গুণ, অনুভূতি বা ধারণাকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Beauty:</b> 'Beauty' একটি Abstract Noun, কারণ এটি একটি গুণ বোঝায় যা দেখা বা স্পর্শ করা যায় না।</li><li><b>(B) Boat:</b> 'Boat' একটি Common Noun, কারণ এট একটি বস্তু।</li><li><b>(C) Sail:</b> 'Sail' একটি Common Noun, কারণ এটি একটি বস্তু বা ক্রিয়া হিসেবে ব্যবহৃত হয়।</li><li><b>(D) Bird:</b> 'Bird' একটি Common Noun, কারণ এটি একটি প্রাণীকে বোঝায়।</li></ul>",
+        },
+        {
+          id: 114,
+          question: "Iron is a useful metal. এখানে 'Iron' শব্দটি কোন প্রকারের Noun?",
+          options: {
+            a: "Proper Noun",
+            b: "Material Noun",
+            c: "Collective Noun",
+            d: "Common Noun",
+          },
+          correct: "b",
+          explanation:
+            "<p>Material Noun হলো এমন বিশেষ্য যা কোনো বস্তুকে বোঝায় যা স্পর্শ করা যায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Proper Noun:</b> 'Iron' একটি নির্দিষ্ট নাম নয়, তাই এটি Proper Noun নয়।</li><li><b>(B) Material Noun:</b> 'Iron' একটি Material Noun, কারণ এটি একটি বস্তু বা পদার্থ বোঝায়।</li><li><b>(C) Collective Noun:</b> 'Iron' একটি গোষ্ঠী নয়, তাই এটি Collective Noun নয়।</li><li><b>(D) Common Noun:</b> 'Iron' সাধারণভাবে একটি ধাতুকে বোঝায়, তাই এটি Common Noun নয়।</li></ul>",
+        },
+        {
+          id: 115,
+          question: "নিম্নের কোনটি Abstract Noun নয়?",
+          options: {
+            a: "Air",
+            b: "Goodwill",
+            c: "Flavour",
+            d: "Water",
+          },
+          correct: "a",
+          explanation:
+            "<p>Abstract Noun হলো এমন বিশেষ্য যা অনুভূতি, গুণ বা ধারণাকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Air:</b> 'Air' একটি Material Noun, কারণ এটি একটি বস্তু বা পদার্থ বোঝায়।</li><li><b>(B) Goodwill:</b> 'Goodwill' একটি Abstract Noun, কারণ এটি একটি গুণ বা ধারণা।</li><li><b>(C) Flavour:</b> 'Flavour' একটি Abstract Noun, কারণ এটি একটি গুণ।</li><li><b>(D) Water:</b> 'Water' একটি Material Noun, কারণ এটি একটি পদার্থ।</li></ul>",
+        },
+        {
+          id: 116,
+          question:
+            "'I saw a flock of sheep,' বাক্যে 'flock' শব্দটি কোন প্রকারের Noun?",
+          options: {
+            a: "Proper Noun",
+            b: "Common Noun",
+            c: "Collective Noun",
+            d: "Material Noun",
+          },
+          correct: "c",
+          explanation:
+            "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Proper Noun:</b> 'Flock' কোনো নির্দিষ্ট নাম নয়।</li><li><b>(B) Common Noun:</b> 'Flock' সাধারণভাবে একটি বস্তু নয়, বরং একটি গোষ্ঠী বোঝায়।</li><li><b>(C) Collective Noun:</b> 'Flock' একটি Collective Noun, কারণ এটি ভেড়ার দল বোঝায়।</li><li><b>(D) Material Noun:</b> 'Flock' কোনো পদার্থ নয়।</li></ul>",
+        },
+        {
+          id: 117,
+          question:
+            "Our team is better than yours. বাক্যে 'Team' শব্দটি কোন প্রকারের Noun?",
+          options: {
+            a: "Common Noun",
+            b: "Collective Noun",
+            c: "Material Noun",
+            d: "Abstract Noun",
+          },
+          correct: "b",
+          explanation:
+            "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Common Noun:</b> 'Team' সাধারণভাবে একটি বস্তু নয়, বরং একটি গোষ্ঠী বোঝায়।</li><li><b>(B) Collective Noun:</b> 'Team' একটি Collective Noun, কারণ এটি একটি দল বোঝায়।</li><li><b>(C) Material Noun:</b> 'Team' কোনো পদার্থ নয়।</li><li><b>(D) Abstract Noun:</b> 'Team' কোনো গুণ বা ধারণা নয়।</li></ul>",
+        },
+        {
+          id: 118,
+          question: "Which group of words are Collective Nouns?",
+          options: {
+            a: "Sajib, America",
+            b: "Water, Milk, Steel",
+            c: "Cattle, Army, Class",
+            d: "Unity, Health, Poverty",
+          },
+          correct: "c",
+          explanation:
+            "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Sajib, America:</b> 'Sajib' ও 'America' হলো Proper Noun।</li><li><b>(B) Water, Milk, Steel:</b> এগুলো Material Noun।</li><li><b>(C) Cattle, Army, Class:</b> এগুলো Collective Noun, কারণ এরা গোষ্ঠী বোঝায়।</li><li><b>(D) Unity, Health, Poverty:</b> এগুলো Abstract Noun, কারণ এরা গুণ বা ধারণা বোঝায়।</li></ul>",
+        },
+        {
+          id: 119,
+          question: "কোনটি Abstract Noun?",
+          options: {
+            a: "Elephant",
+            b: "Harbour",
+            c: "Strength",
+            d: "Dhaka",
+          },
+          correct: "c",
+          explanation:
+            "<p>Abstract Noun হলো এমন বিশেষ্য যা গুণ, অনুভূতি বা ধারণাকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Elephant:</b> 'Elephant' একটি Common Noun, কারণ এটি একটি প্রাণী।</li><li><b>(B) Harbour:</b> 'Harbour' একটি Common Noun, কারণ এটি একটি স্থান।</li><li><b>(C) Strength:</b> 'Strength' একটি Abstract Noun, কারণ এটি একটি গুণ।</li><li><b>(D) Dhaka:</b> 'Dhaka' একটি Proper Noun, কারণ এটি একটি নির্দিষ্ট স্থানের নাম।</li></ul>",
+        },
+        {
+          id: 120,
+          question: "কোনটি Common Noun?",
+          options: {
+            a: "February",
+            b: "Jute",
+            c: "Month",
+            d: "Class",
+          },
+          correct: "c",
+          explanation:
+            "<p>Common Noun হলো এমন বিশেষ্য যা সাধারণ বস্তু, ব্যক্তি বা স্থানকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) February:</b> 'February' একটি Proper Noun, কারণ এটি একটি নির্দিষ্ট মাসের নাম।</li><li><b>(B) Jute:</b> 'Jute' একটি Material Noun, কারণ এটি একটি পদার্থ।</li><li><b>(C) Month:</b> 'Month' একটি Common Noun, কারণ এটি সাধারণভাবে মাস বোঝায়।</li><li><b>(D) Class:</b> 'Class' একটি Collective Noun, কারণ এটি একটি গোষ্ঠী বোঝায়।</li></ul>",
+        },
+        {
+          id: 121,
+          question: "কোনটি Collective Noun?",
+          options: {
+            a: "Boy",
+            b: "Books",
+            c: "Library",
+            d: "Mouth",
+          },
+          correct: "c",
+          explanation:
+            "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Boy:</b> 'Boy' একটি Common Noun, কারণ এটি একটি ব্যক্তি।</li><li><b>(B) Books:</b> 'Books' একটি Common Noun, কারণ এটি বস্তু।</li><li><b>(C) Library:</b> 'Library' একটি Collective Noun, কারণ এটি বইয়ের সমষ্টি বোঝায়।</li><li><b>(D) Mouth:</b> 'Mouth' একটি Common Noun, কারণ এটি শরীরের একটি অংশ।</li></ul>",
+        },
+        {
+          id: 122,
+          question: "What kind of noun is 'Dhaka'?",
+          options: {
+            a: "Proper",
+            b: "Common",
+            c: "Collective",
+            d: "Material",
+          },
+          correct: "a",
+          explanation:
+            "<p>Proper Noun হলো এমন বিশেষ্য যা নির্দিষ্ট ব্যক্তি, স্থান বা বস্তুর নাম বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Proper:</b> 'Dhaka' একটি Proper Noun, কারণ এটি একটি নির্দিষ্ট স্থানের নাম।</li><li><b>(B) Common:</b> 'Dhaka' সাধারণ নয়, তাই Common Noun নয়।</li><li><b>(C) Collective:</b> 'Dhaka' কোনো গোষ্ঠী নয়।</li><li><b>(D) Material:</b> 'Dhaka' কোনো পদার্থ নয়।</li></ul>",
+        },
+        {
+          id: 123,
+          question: "Which one of the following is an example of Proper Noun?",
+          options: {
+            a: "The police",
+            b: "Car",
+            c: "Bangladesh",
+            d: "Family",
+          },
+          correct: "c",
+          explanation:
+            "<p>Proper Noun হলো এমন বিশেষ্য যা নির্দিষ্ট ব্যক্তি, স্থান বা বস্তুর নাম বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) The police:</b> 'Police' একটি Collective Noun।</li><li><b>(B) Car:</b> 'Car' একটি Common Noun।</li><li><b>(C) Bangladesh:</b> 'Bangladesh' একটি Proper Noun, কারণ এটি একটি নির্দিষ্ট দেশের নাম।</li><li><b>(D) Family:</b> 'Family' একটি Collective Noun।</li></ul>",
+        },
+        {
+          id: 124,
+          question: "Flock is a-",
+          options: {
+            a: "Proper Noun",
+            b: "Common Noun",
+            c: "Collective Noun",
+            d: "Abstract Noun",
+          },
+          correct: "c",
+          explanation:
+            "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Proper Noun:</b> 'Flock' কোনো নির্দিষ্ট নাম নয়।</li><li><b>(B) Common Noun:</b> 'Flock' সাধারণ বস্তু নয়, বরং একটি গোষ্ঠী।</li><li><b>(C) Collective Noun:</b> 'Flock' একটি Collective Noun, কারণ এটি পশুদের দল বোঝায়।</li><li><b>(D) Abstract Noun:</b> 'Flock' কোনো গুণ বা ধারণা নয়।</li></ul>",
+        },
+        {
+          id: 125,
+          question: "What kind of noun is 'journey'?",
+          options: {
+            a: "Common",
+            b: "Collective",
+            c: "Proper",
+            d: "Abstract",
+          },
+          correct: "a",
+          explanation:
+            "<p>Common Noun হলো এমন বিশেষ্য যা সাধারণ বস্তু, ব্যক্তি বা ধারণাকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Common:</b> 'Journey' একটি Common Noun, কারণ এটি একটি সাধারণ ধারণা বা কাজ বোঝায়।</li><li><b>(B) Collective:</b> 'Journey' কোনো গোষ্ঠী নয়।</li><li><b>(C) Proper:</b> 'Journey' কোনো নির্দিষ্ট নাম নয়।</li><li><b>(D) Abstract:</b> 'Journey' একটি ক্রিয়া বা অভিজ্ঞতা হলেও এটি সাধারণত Common Noun হিসেবে বিবেচিত হয়।</li></ul>",
+        },
+        {
+          id: 126,
+          question: "Find the collective noun from the following:",
+          options: {
+            a: "Water",
+            b: "Cow",
+            c: "Kindness",
+            d: "Army",
+          },
+          correct: "d",
+          explanation:
+            "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Water:</b> 'Water' একটি Material Noun।</li><li><b>(B) Cow:</b> 'Cow' একটি Common Noun।</li><li><b>(C) Kindness:</b> 'Kindness' একটি Abstract Noun।</li><li><b>(D) Army:</b> 'Army' একটি Collective Noun, কারণ এটি একটি গোষ্ঠী বোঝায়।</li></ul>",
+        },
+        {
+          id: 127,
+          question: "Which of the following words is not similar to 'school'?",
+          options: {
+            a: "Flock",
+            b: "Herd",
+            c: "College",
+            d: "Pack",
+          },
+          correct: "c",
+          explanation:
+            "<p>'School' একটি Collective Noun, যা একটি গোষ্ঠী বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Flock:</b> 'Flock' একটি Collective Noun, যা পশুদের দল বোঝায়।</li><li><b>(B) Herd:</b> 'Herd' একটি Collective Noun, যা পশুদের দল বোঝায়।</li><li><b>(C) College:</b> 'College' একটি Common Noun, কারণ এটি একটি সাধারণ স্থান বোঝায়।</li><li><b>(D) Pack:</b> 'Pack' একটি Collective Noun, যা পশুদের দল বোঝায়।</li></ul>",
+        },
+        {
+          id: 128,
+          question: "Which one of the following is a Common Noun?",
+          options: {
+            a: "Pirate",
+            b: "Humility",
+            c: "Roguery",
+            d: "Straw",
+          },
+          correct: "a",
+          explanation:
+            "<p>Common Noun হলো এমন বিশেষ্য যা সাধারণ বস্তু, ব্যক্তি বা স্থানকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Pirate:</b> 'Pirate' একটি Common Noun, কারণ এটি একটি সাধারণ ব্যক্তি বোঝায়।</li><li><b>(B) Humility:</b> 'Humility' একটি Abstract Noun, কারণ এটি একটি গুণ।</li><li><b>(C) Roguery:</b> 'Roguery' একটি Abstract Noun, কারণ এটি একটি গুণ।</li><li><b>(D) Straw:</b> 'Straw' একটি Material Noun, কারণ এটি একটি পদার্থ।</li></ul>",
+        },
+        {
+          id: 129,
+          question:
+            "Water has no colour of its own. What type of noun the underlined word is?",
+          options: {
+            a: "Common",
+            b: "Abstract",
+            c: "Proper",
+            d: "Material",
+          },
+          correct: "d",
+          explanation:
+            "<p>Material Noun হলো এমন বিশেষ্য যা কোনো বস্তু বা পদার্থকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Common:</b> 'Water' সাধারণ নয়, বরং একটি পদার্থ।</li><li><b>(B) Abstract:</b> 'Water' কোনো গুণ বা ধারণা নয়।</li><li><b>(C) Proper:</b> 'Water' কোনো নির্দিষ্ট নাম নয়।</li><li><b>(D) Material:</b> 'Water' একটি Material Noun, কারণ এটি একটি পদার্থ।</li></ul>",
+        },
+        {
+          id: 130,
+          question: "What kind of noun is 'Infant'?",
+          options: {
+            a: "Proper",
+            b: "Common",
+            c: "Material",
+            d: "Collective",
+          },
+          correct: "b",
+          explanation:
+            "<p>Common Noun হলো এমন বিশেষ্য যা সাধারণ বস্তু, ব্যক্তি বা স্থানকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Proper:</b> 'Infant' কোনো নির্দিষ্ট নাম নয়।</li><li><b>(B) Common:</b> 'Infant' একটি Common Noun, কারণ এটি একটি সাধারণ ব্যক্তি বোঝায়।</li><li><b>(C) Material:</b> 'Infant' কোনো পদার্থ নয়।</li><li><b>(D) Collective:</b> 'Infant' কোনো গোষ্ঠী নয়।</li></ul>",
+        },
+        {
+          id: 131,
+          question: "The word 'hatred (হেইট্রিড-ঘৃণা)' is noun.",
+          options: {
+            a: "Abstract",
+            b: "Proper",
+            c: "Collective",
+            d: "Material",
+          },
+          correct: "a",
+          explanation:
+            "<p>Abstract Noun হলো এমন বিশেষ্য যা অনুভূতি, গুণ বা ধারণাকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Abstract:</b> 'Hatred' একটি Abstract Noun, কারণ এটি একটি অনুভূতি বোঝায়।</li><li><b>(B) Proper:</b> 'Hatred' কোনো নির্দিষ্ট নাম নয়।</li><li><b>(C) Collective:</b> 'Hatred' কোনো গোষ্ঠী নয়।</li><li><b>(D) Material:</b> 'Hatred' কোনো পদার্থ নয়।</li></ul>",
+        },
 
+
+
+
+
+
+
+        
+        {
+          id: 132,
+          question: "'Love', 'courage' and 'childhood' are examples of-",
+          options: {
+            a: "Proper Nouns",
+            b: "Abstract Nouns",
+            c: "Countable Nouns",
+            d: "Common Nouns",
+          },
+          correct: "b",
+          explanation:
+            "<p>Abstract Noun হলো এমন বিশেষ্য যা গুণ, অনুভূতি বা ধারণাকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Proper Nouns:</b> এগুলো নির্দিষ্ট নাম নয়।</li><li><b>(B) Abstract Nouns:</b> 'Love', 'Courage', 'Childhood' হলো Abstract Noun, কারণ এগুলো অনুভূতি ও অবস্থা বোঝায়।</li><li><b>(C) Countable Nouns:</b> এগুলো গণনাযোগ্য হলেও প্রধানত Abstract Noun।</li><li><b>(D) Common Nouns:</b> এগুলো সাধারণ বস্তু বা ব্যক্তি নয়।</li></ul>",
+        },
+        {
+          id: 133,
+          question: "Which noun below is a Collective Noun?",
+          options: {
+            a: "Men",
+            b: "Duck",
+            c: "Family",
+            d: "Children",
+          },
+          correct: "c",
+          explanation:
+            "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Men:</b> 'Men' একটি Common Noun, কারণ এটি ব্যক্তিদের বোঝায়।</li><li><b>(B) Duck:</b> 'Duck' একটি Common Noun, কারণ এটি একটি প্রাণী।</li><li><b>(C) Family:</b> 'Family' একটি Collective Noun, কারণ এটি একটি গোষ্ঠী বোঝায়।</li><li><b>(D) Children:</b> 'Children' একটি Common Noun, কারণ এটি ব্যক্তিদের বোঝায়।</li></ul>",
+        },
+        {
+          id: 134,
+          question: "An enormous _____ of locusts ate all of the crops.",
+          options: {
+            a: "Swarm",
+            b: "Bunch",
+            c: "Herd",
+            d: "Bevy",
+            e: "School",
+          },
+          correct: "a",
+          explanation:
+            "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Swarm:</b> 'Swarm' একটি Collective Noun, কারণ এটি পোকামাকড়ের দল বোঝায়।</li><li><b>(B) Bunch:</b> 'Bunch' একটি Collective Noun, কিন্তু পোকামাকড়ের জন্য ব্যবহৃত হয় না।</li><li><b>(C) Herd:</b> 'Herd' পশুদের দলের জন্য ব্যবহৃত হয়।</li><li><b>(D) Bevy:</b> 'Bevy' পাখিদের দলের জন্য ব্যবহৃত হয়।</li><li><b>(E) School:</b> 'School' মাছের দলের জন্য ব্যবহৃত হয়।</li></ul>",
+        },
+        {
+          id: 135,
+          question: "A _____ of banknotes.",
+          options: {
+            a: "Bunch",
+            b: "Wad",
+            c: "Hatch",
+            d: "Group",
+          },
+          correct: "b",
+          explanation:
+            "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Bunch:</b> 'Bunch' একটি Collective Noun, কিন্তু টাকার জন্য সাধারণত ব্যবহৃত হয় না।</li><li><b>(B) Wad:</b> 'Wad' একটি Collective Noun, যা টাকার গোষ্ঠী বোঝায়।</li><li><b>(C) Hatch:</b> 'Hatch' ডিমের গোষ্ঠী বোঝায়।</li><li><b>(D) Group:</b> 'Group' একটি Collective Noun, কিন্তু টাকার জন্য 'Wad' বেশি উপযুক্ত।</li></ul>",
+        },
+        {
+          id: 136,
+          question: "A _____ of fish.",
+          options: {
+            a: "Flock",
+            b: "Group",
+            c: "School",
+            d: "Fleet",
+          },
+          correct: "c",
+          explanation:
+            "<p>Collective Noun হলো এমন বিশেষ্য যা একটি গোষ্ঠী বা সমষ্টিকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Flock:</b> 'Flock' পাখি বা ভেড়ার দলের জন্য ব্যবহৃত হয়।</li><li><b>(B) Group:</b> 'Group' একটি সাধারণ Collective Noun, কিন্তু মাছের জন্য 'School' বেশি উপযুক্ত।</li><li><b>(C) School:</b> 'School' একটি Collective Noun, যা মাছের দল বোঝায়।</li><li><b>(D) Fleet:</b> 'Fleet' জাহাজের দলের জন্য ব্যবহৃত হয়।</li></ul>",
+        },
+        {
+          id: 137,
+          question: "Which of the following is an Abstract Noun?",
+          options: {
+            a: "People",
+            b: "Honesty",
+            c: "Sun",
+            d: "River",
+          },
+          correct: "b",
+          explanation:
+            "<p>Abstract Noun হলো এমন বিশেষ্য যা গুণ, অনুভূতি বা ধারণাকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) People:</b> 'People' একটি Common Noun।</li><li><b>(B) Honesty:</b> 'Honesty' একটি Abstract Noun, কারণ এটি একটি গুণ।</li><li><b>(C) Sun:</b> 'Sun' একটি Proper Noun।</li><li><b>(D) River:</b> 'River' একটি Common Noun।</li></ul>",
+        },
+        {
+          id: 138,
+          question: "Which is not Proper Noun?",
+          options: {
+            a: "People",
+            b: "Karim",
+            c: "Sun",
+            d: "River",
+          },
+          correct: "a",
+          explanation:
+            "<p>Proper Noun হলো এমন বিশেষ্য যা নির্দিষ্ট ব্যক্তি, স্থান বা বস্তুর নাম বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) People:</b> 'People' একটি Common Noun, কারণ এটি সাধারণ ব্যক্তিদের বোঝায়।</li><li><b>(B) Karim:</b> 'Karim' একটি Proper Noun, কারণ এটি একটি নির্দিষ্ট নাম।</li><li><b>(C) Sun:</b> 'Sun' একটি Proper Noun, কারণ এটি একটি নির্দিষ্ট নাম।</li><li><b>(D) River:</b> 'River' একটি Common Noun, তবে এটি Proper Noun হতে পারে যদি নির্দিষ্ট নদীর নাম হয়।</li></ul>",
+        },
+        {
+          id: 139,
+          question: "Paper, water, iron, gold and milk are-",
+          options: {
+            a: "Abstract Nouns",
+            b: "Material Nouns",
+            c: "Collective Nouns",
+            d: "Common Nouns",
+          },
+          correct: "b",
+          explanation:
+            "<p>Material Noun হলো এমন বিশেষ্য যা কোনো বস্তু বা পদার্থকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Abstract Nouns:</b> এগুলো গুণ বা ধারণা নয়।</li><li><b>(B) Material Nouns:</b> 'Paper', 'Water', 'Iron', 'Gold', 'Milk' হলো Material Noun, কারণ এগুলো পদার্থ।</li><li><b>(C) Collective Nouns:</b> এগুলো গোষ্ঠী নয়।</li><li><b>(D) Common Nouns:</b> এগুলো সাধারণ নয়, বরং পদার্থ।</li></ul>",
+        },
+        {
+          id: 140,
+          question:
+            "What kind of noun the following words belongs to 'love, affection'?",
+          options: {
+            a: "Abstract",
+            b: "Common",
+            c: "Collective",
+            d: "Proper",
+          },
+          correct: "a",
+          explanation:
+            "<p>Abstract Noun হলো এমন বিশেষ্য যা গুণ, অনুভূতি বা ধারণাকে বোঝায়।</p><br><p><b>ব্যাখ্যা:</b></p><ul><li><b>(A) Abstract:</b> 'Love', 'Affection' হলো Abstract Noun, কারণ এগুলো অনুভূতি বোঝায়।</li><li><b>(B) Common:</b> এগুলো সাধারণ বস্তু বা ব্যক্তি নয়।</li><li><b>(C) Collective:</b> এগুলো গোষ্ঠী নয়।</li><li><b>(D) Proper:</b> এগুলো নির্দিষ্ট নাম নয়।</li></ul>",
+        },
       ];
 
       const totalQuestions = questions.length;
@@ -1061,6 +1094,10 @@ shad
       }
 
       function initializeChart() {
+        if (typeof Chart === "undefined") {
+          console.error("Chart.js not loaded");
+          return;
+        }
         const ctx = document.getElementById("scoreChart").getContext("2d");
         chartInstance = new Chart(ctx, {
           type: "pie",
@@ -1194,7 +1231,7 @@ shad
                   .querySelector(".option-text")
                   .classList.add("incorrect-text");
                 question
-                  .querySelector([data-option="${correctAnswer}"] .option-text)
+                  .querySelector(`[data-option="${correctAnswer}"] .option-text`)
                   .classList.add("correct-text");
                 score -= 0.25;
                 wrong++;
@@ -1202,7 +1239,7 @@ shad
               }
             } else {
               question
-                question.querySelector(`[data-option="${correctAnswer}"] .option-text`)
+                .querySelector(`[data-option="${correctAnswer}"] .option-text`)
                 .classList.add("unattempted-text");
               unanswered++;
               question.setAttribute("data-status", "unanswered");
@@ -1230,12 +1267,12 @@ shad
         document.getElementById("answered").innerText = toBengaliNumber(answered);
         document.getElementById("correctAnswers").innerText =
           toBengaliNumber(correct);
-        document.getElementById("wrongAnswers").innerText = toBengaliNumber(wrong);
+        document.getElementById("wrongAnswers").innerText =
+          toBengaliNumber(wrong);
         document.getElementById("unanswered").innerText =
           toBengaliNumber(unanswered);
-        document.getElementById("finalScore").innerText = toBengaliNumber(
-          score.toFixed(2)
-        );
+        document.getElementById("finalScore").innerText =
+          toBengaliNumber(score.toFixed(2));
         document.getElementById("popupSerial").innerText = serialNumber;
 
         document.getElementById("formSerialNumber").value = serialNumber;
@@ -1272,25 +1309,7 @@ shad
           const formData = new FormData(form);
           const url = form.action;
 
-          // Send data in the background using fetch
-          fetch(url, {
-            method: "POST",
-            body: formData,
-            headers: {
-              Accept: "application/json",
-            },
-          })
-            .then((response) => {
-              if (response.ok) {
-                console.log("Form submitted successfully");
-              } else {
-                console.error("Form submission failed:", response.statusText);
-              }
-            })
-            .catch((error) => {
-              console.error("Error:", error);
-            });
-
+          navigator.sendBeacon(url, formData);
           closePopup();
         });
 
