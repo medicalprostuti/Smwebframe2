@@ -1,13 +1,26 @@
 <!DOCTYPE html>
 <html lang="bn">
   <head>
+    <script>
+      document.addEventListener("contextmenu", (event) =>
+        event.preventDefault()
+      );
+      document.addEventListener("keydown", (event) => {
+        if (
+          (event.ctrlKey &&
+            ["u", "s", "i", "j"].includes(event.key.toLowerCase())) ||
+          event.key === "F12"
+        ) {
+          event.preventDefault();
+        }
+      });
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GK Free exam-01</title>
+    <title>Online Exam</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap");
-
       body {
         font-family: "Hind Siliguri", sans-serif;
         margin: 0;
@@ -18,11 +31,9 @@
         align-items: center;
         height: 100vh;
       }
-
       .container {
         font-family: "Hind Siliguri", sans-serif;
         width: 100%;
-        max-width: 800px; /* Added max-width for better readability */
         margin: auto;
         background-color: white;
         padding: 20px;
@@ -30,20 +41,17 @@
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         min-height: 80vh;
       }
-
       .exam-content {
         padding: 20px;
         display: flex;
         flex-direction: column;
         align-items: center;
       }
-
       h1 {
         color: #1b0b54;
         text-align: center;
         margin-bottom: 10px;
       }
-
       #timer {
         font-size: 20px;
         color: #1b0b54;
@@ -51,19 +59,16 @@
         font-weight: normal;
         text-align: center;
       }
-
       #exam-info {
         font-size: 16px;
         color: black;
         margin-bottom: 20px;
         text-align: center;
       }
-
       #exam {
         width: 100%;
         min-height: 100px;
       }
-
       .chart-container {
         width: 200px;
         height: 200px;
@@ -74,27 +79,22 @@
         display: none;
         padding: 10px;
       }
-
       .chart-container.visible {
         display: block;
       }
-
       .question-container {
         text-align: left;
         margin-bottom: 20px;
         display: none;
       }
-
       .question-label {
         font-weight: bold;
         color: #1b0b54;
         margin-bottom: 10px;
       }
-
       .options {
         margin-top: 10px;
       }
-
       .option {
         margin-bottom: 8px;
         display: flex;
@@ -104,7 +104,6 @@
         border-radius: 5px;
         text-transform: uppercase;
       }
-
       .circle {
         width: 20px;
         height: 20px;
@@ -118,33 +117,28 @@
         font-weight: bold;
         font-size: 18px;
       }
-
       .selected .circle {
         background-color: #1b0b54;
         color: white;
       }
-
       .correct-text {
         color: green !important;
       }
-
       .incorrect-text {
         color: #ff0800 !important;
       }
-
       .unattempted-text {
         color: orange !important;
       }
-
+      /* Updated CSS for submit button */
       .button-container {
         display: flex;
         justify-content: center;
         width: 100%;
-        margin-top: 20px;
+        margin-top: 20px; /* Added margin-top to separate from questions */
       }
-
       #submitBtn {
-        font-family: "Hind Siliguri", sans-serif;
+        font-family: hind siliguri;
         padding: 15px 30px;
         background-color: #1b0b54;
         color: white;
@@ -156,16 +150,9 @@
         width: 200px;
         transition: background-color 0.3s ease;
       }
-
-      #submitBtn:disabled {
-        background-color: #ccc;
-        cursor: not-allowed;
-      }
-
-      #submitBtn:hover:not(:disabled) {
+      #submitBtn:hover {
         background-color: #1b0b54;
       }
-
       .popup {
         position: fixed;
         top: 50%;
@@ -181,12 +168,10 @@
         z-index: 1000;
         transition: transform 0.5s ease, opacity 0.5s ease;
       }
-
       .popup.slide-out {
         transform: translate(-50%, -100%);
         opacity: 0;
       }
-
       .popup-header {
         background-color: #1b0b54;
         color: white;
@@ -195,17 +180,14 @@
         font-weight: bold;
         border-radius: 10px 10px 0 0;
       }
-
       .popup-body {
         padding: 15px;
       }
-
       .popup-body p {
         margin: 10px 0;
       }
-
       .confirm-btn {
-        font-family: "Hind Siliguri", sans-serif;
+        font-family: hind siliguri;
         background-color: #34c759;
         color: white;
         padding: 8px 15px;
@@ -215,11 +197,9 @@
         border-radius: 5px;
         margin: 5px;
       }
-
       .confirm-btn:hover {
-        background-color: #28a745;
+        background-color: #34c759;
       }
-
       .cancel-btn {
         background-color: #ff3b30;
         color: white;
@@ -230,20 +210,16 @@
         border-radius: 5px;
         margin: 5px;
       }
-
       .cancel-btn:hover {
         background-color: #e02b21;
       }
-
       .explanation-dropdown {
         display: none;
         margin-top: 10px;
       }
-
       .explanation-dropdown.visible {
         display: block;
       }
-
       .explanation-btn {
         background-color: #1b0b54;
         color: white;
@@ -257,22 +233,18 @@
         text-align: left;
         position: relative;
       }
-
       .explanation-btn:hover {
         background-color: #1b0b54;
       }
-
       .explanation-btn::after {
         content: "▼";
         position: absolute;
         right: 10px;
         font-size: 12px;
       }
-
       .explanation-btn.active::after {
         content: "▲";
       }
-
       .explanation-content {
         display: none;
         padding: 15px;
@@ -286,45 +258,37 @@
         overflow-y: auto;
         margin-top: 5px;
       }
-
       .explanation-content.visible {
         display: block;
       }
-
       .explanation-content p {
         margin: 0 0 10px 0;
       }
-
       .explanation-content ul {
         margin: 0;
         padding-left: 20px;
       }
-
       .explanation-content li {
         margin-bottom: 5px;
       }
-
       .explanation-content strong {
         color: #1b0b54;
       }
-
       .explanation-label {
         font-weight: bold;
         color: #1b0b54;
         margin-bottom: 10px;
         display: block;
       }
-
       .locked .option {
         pointer-events: none;
         cursor: default;
       }
-
       .locked .option.selected {
         pointer-events: none;
         cursor: default;
       }
-
+      /* Updated CSS for serial number input section */
       .serial-input-container {
         display: flex;
         flex-direction: column;
@@ -332,13 +296,11 @@
         margin-bottom: 20px;
         text-align: center;
       }
-
       .serial-input-container p {
         color: #1b0b54;
         font-weight: bold;
         margin-bottom: 10px;
       }
-
       .serial-input-container input {
         width: 100%;
         max-width: 250px;
@@ -348,15 +310,14 @@
         border-radius: 5px;
         border: 1px solid #ccc;
         margin-bottom: 15px;
-        font-family: "Hind Siliguri", sans-serif;
+        font-family: "Hind Siliguri", sans-serif; /* Added font-family */
       }
-
       .serial-input-container input::placeholder {
-        font-family: "Hind Siliguri", sans-serif;
+        font-family: "Hind Siliguri", sans-serif; /* Added font-family to placeholder */
       }
-
+      /* New styling for start exam button */
       #startExamBtn {
-        font-family: "Hind Siliguri", sans-serif;
+        font-family: hind siliguri;
         padding: 12px 25px;
         background-color: #1b0b54;
         color: white;
@@ -364,42 +325,37 @@
         cursor: pointer;
         font-size: 16px;
         border-radius: 8px;
-        width: 150px;
+        width: 150px; /* Reduced width */
         transition: background-color 0.3s ease;
       }
-
       #startExamBtn:hover {
         background-color: #1b0b54;
       }
-
+      /* Updated CSS for error popup */
       #errorPopup {
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-        padding: 20px; /* Consistent padding */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Reduced shadow */
       }
-
       #errorPopup .popup-body {
-        padding: 15px;
+        min-height: unset; /* Ensure height is minimal */
+        padding-bottom: 10px; /* Adjust padding as needed */
       }
-
       #errorPopup .popup-body p {
-        margin: 10px 0;
+        margin-top: 0;
+        margin-bottom: 15px; /* Adjust margin as needed */
       }
     </style>
   </head>
   <body>
     <div class="container" id="examContainer">
       <div class="exam-content">
-        <h1>GK Free exam-01</h1>
+        <h1>বোটানি অনুশীলন</h1>
         <div id="serialInputContainer" class="serial-input-container">
           <p>তোমার সিরিয়াল নম্বরটি দাও:</p>
           <input
-            type="text"
+            type="number"
             id="serialNumberInput"
             placeholder="সিরিয়াল নম্বর"
             maxlength="5"
-            pattern="[0-9]{5}"
-            inputmode="numeric"
-            aria-label="সিরিয়াল নম্বর প্রবেশ করান"
           />
           <button id="startExamBtn">শুরু করো</button>
         </div>
@@ -416,19 +372,34 @@
         </div>
       </div>
     </div>
-
     <div class="popup" id="scorePopup">
       <div class="popup-header">তোমার স্কোর</div>
       <div class="popup-body">
-        <p><strong>সিরিয়াল নম্বর:</strong> <span id="popupSerial"></span></p>
-        <p><strong>মোট প্রশ্ন:</strong> <span id="totalQuestions"></span></p>
-        <p><strong>উত্তর দিয়েছো:</strong> <span style="color: #000000" id="answered"></span></p>
-        <p><strong>সঠিক উত্তর:</strong> <span style="color: #0ab853" id="correctAnswers"></span></p>
-        <p><strong>ভুল উত্তর:</strong> <span style="color: #f81010" id="wrongAnswers"></span></p>
-        <p><strong>অনুত্তরিত:</strong> <span style="color: #ffc801" id="unanswered"></span></p>
+        <p>
+          <strong>সিরিয়াল নম্বর:</strong> <span id="popupSerial"></span>
+        </p>
+        <p>
+          <strong>মোট প্রশ্ন:</strong> <span id="totalQuestions"></span>
+        </p>
+        <p>
+          <strong>উত্তর দিয়েছো:</strong>
+          <span style="color: #000000" id="answered"></span>
+        </p>
+        <p>
+          <strong>সঠিক উত্তর:</strong>
+          <span style="color: #0ab853" id="correctAnswers"></span>
+        </p>
+        <p>
+          <strong>ভুল উত্তর:</strong>
+          <span style="color: #f81010" id="wrongAnswers"></span>
+        </p>
+        <p>
+          <strong>অনুত্তরিত:</strong>
+          <span style="color: #ffc801" id="unanswered"></span>
+        </p>
         <p><strong>তোমার চূড়ান্ত স্কোর:</strong></p>
         <h2 style="color: #1b0b54"><span id="finalScore"></span></h2>
-        <form id="scoreForm">
+        <div id="scoreForm">
           <input type="hidden" name="serialNumber" id="formSerialNumber" />
           <input type="hidden" name="actionType" value="exam_submit" />
           <input type="hidden" name="submissionTime" id="formSubmissionTime" />
@@ -436,13 +407,17 @@
           <input type="hidden" name="correctAnswers" id="formCorrectAnswers" />
           <input type="hidden" name="wrongAnswers" id="formWrongAnswers" />
           <input type="hidden" name="unanswered" id="formUnanswered" />
-          <button type="submit" class="confirm-btn" style="background-color: #1b0b54">
+          <button
+            type="button"
+            class="confirm-btn"
+            style="background-color: #1b0b54"
+            onclick="closePopup()"
+          >
             <b>ওকে</b>
           </button>
-        </form>
+        </div>
       </div>
     </div>
-
     <div class="popup" id="confirmPopup">
       <div class="popup-header">কনফার্ম করো</div>
       <div class="popup-body">
@@ -450,112 +425,87 @@
           ভালো করে দেখে নাও! <br />
           পরীক্ষা শেষ করতে চাও তো?
         </p>
-        <button class="confirm-btn" onclick="confirmSubmit()">হ্যাঁ</button>
-        <button class="cancel-btn" onclick="cancelSubmit()">না</button>
+        <button class="confirm-btn" onclick="confirmSubmit()">
+          <b>হ্যাঁ</b>
+        </button>
+        <button class="cancel-btn" onclick="cancelSubmit()"><b>না</b></button>
       </div>
     </div>
-
     <div class="popup" id="errorPopup">
       <div class="popup-header">ত্রুটি</div>
       <div class="popup-body">
-        <p>সিরিয়াল নম্বরটি অবশ্যই ৫-সংখ্যার ধনাত্মক সংখ্যা হতে হবে।</p>
-        <button class="confirm-btn" onclick="closeErrorPopup()">ওকে</button>
+        <p>সিরিয়াল নম্বরটি অবশ্যই ৫-সংখ্যার হতে হবে।</p>
+        <button class="confirm-btn" onclick="closeErrorPopup()">
+          <b>ওকে</b>
+        </button>
       </div>
     </div>
-
     <script>
       let chartInstance = null;
       let serialNumber = "";
       let examStartTime = null;
+      const FORMSPREE_URL = "https://formspree.io/f/mblodpag"; // Constant for Formspree URL
 
       document.addEventListener("DOMContentLoaded", function () {
         const startExamBtn = document.getElementById("startExamBtn");
         startExamBtn.addEventListener("click", startExam);
-
         const submitBtn = document.getElementById("submitBtn");
         submitBtn.addEventListener("click", showConfirmPopup);
-
-        // Initialize chart early
-        initializeChart();
-
-        // Prevent form resubmission
-        document.getElementById("scoreForm").addEventListener("submit", handleFormSubmit);
-
-        // Add keyboard accessibility
-        document.querySelectorAll(".option").forEach((option) => {
-          option.setAttribute("tabindex", "0");
-          option.addEventListener("keydown", (e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              option.click();
-            }
-          });
-        });
       });
-
-      function handleFormSubmit(event) {
-        event.preventDefault();
-        const formData = new FormData(document.getElementById("scoreForm"));
-        const url = "https://formspree.io/f/xpwdgpby";
-
-        fetch(url, {
-          method: "POST",
-          body: formData,
-          headers: {
-            Accept: "application/json",
-          },
-        })
-          .then((response) => {
-            if (response.ok) {
-              alert("ফলাফল সফলভাবে জমা দেওয়া হয়েছে!");
-              hidePopup(document.getElementById("scorePopup"));
-            } else {
-              throw new Error("ফলাফল জমা দিতে সমস্যা হয়েছে।");
-            }
-          })
-          .catch((error) => {
-            console.error("Form submission error:", error);
-            alert("ফলাফল জমা দিতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করো।");
-          });
-      }
-
       function startExam() {
         const serialNumberInput = document.getElementById("serialNumberInput");
         const inputSerial = serialNumberInput.value.trim();
-
-        // Stricter validation
-        if (!/^\d{5}$/.test(inputSerial) || inputSerial < 0) {
+        if (inputSerial.length !== 5 || isNaN(inputSerial)) {
           showErrorPopup();
           return;
         }
-
         serialNumber = inputSerial;
         examStartTime = new Date().toISOString();
-
-        // Send start time data to Formspree
+        // Send start time data to Formspree in the background
         sendFormspreeData({
           serialNumber: serialNumber,
           actionType: "exam_start",
           startTime: examStartTime,
-        });
-
+        }, true); // Use navigator.sendBeacon for start time
         // Hide serial input and show exam content
         document.getElementById("serialInputContainer").style.display = "none";
         document.getElementById("examContentArea").style.display = "block";
-
         generateQuestions();
         startTimer();
       }
-
-      function sendFormspreeData(data) {
+      
+      // Function to send data to Formspree
+      function sendFormspreeData(data, useBeacon = false) {
         const formData = new FormData();
         for (const key in data) {
           formData.append(key, data[key]);
         }
-        const url = "https://formspree.io/f/xpwdgpby";
-        navigator.sendBeacon(url, formData);
+        
+        if (useBeacon) {
+            // Use navigator.sendBeacon for non-critical, background data (like start time)
+            navigator.sendBeacon(FORMSPREE_URL, formData);
+        } else {
+            // Use fetch for critical data submission (like final score)
+            fetch(FORMSPREE_URL, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    Accept: "application/json",
+                },
+            })
+            .then((response) => {
+                if (response.ok) {
+                    console.log("Final score submitted successfully.");
+                } else {
+                    console.error("Final score submission failed:", response.statusText);
+                }
+            })
+            .catch((error) => {
+                console.error("Error submitting final score:", error);
+            });
+        }
       }
-
+      
       const questions = [
         {
           id: 1,
@@ -1220,39 +1170,47 @@
             "<p><strong>অস্থায়ী প্রবাসী সরকার</strong> (মুজিবনগর সরকার) <strong>১০ এপ্রিল, ১৯৭১</strong> গঠিত হয়।</p>",
         },
       ];
-
       const totalQuestions = questions.length;
       let timeLeft = Math.floor(totalQuestions / 2) * 60;
       const timerElement = document.getElementById("timer");
       let timerInterval;
-
       function updateTimer() {
-        if (timeLeft <= 0) {
-          timerElement.innerText = "০ মিনিট ০ সেকেন্ড";
-          stopTimer();
-          confirmSubmit();
-          return;
-        }
         const minutes = Math.floor(timeLeft / 60);
         const seconds = timeLeft % 60;
-        timerElement.innerText = `${toBengaliNumber(minutes)} মিনিট ${toBengaliNumber(seconds)} সেকেন্ড`;
-        timeLeft--;
+        timerElement.innerText = `${toBengaliNumber(
+          minutes
+        )} মিনিট ${toBengaliNumber(seconds)} সেকেন্ড`;
+        if (timeLeft > 0) {
+          timeLeft--;
+        } else {
+          stopTimer();
+          confirmSubmit();
+        }
       }
-
       function startTimer() {
-        timerElement.innerText = `${toBengaliNumber(Math.floor(timeLeft / 60))} মিনিট ${toBengaliNumber(timeLeft % 60)} সেকেন্ড`;
+        timerElement.innerText = `${toBengaliNumber(
+          Math.floor(timeLeft / 60)
+        )} মিনিট ${toBengaliNumber(timeLeft % 60)} সেকেন্ড`;
         timerInterval = setInterval(updateTimer, 1000);
       }
-
       function stopTimer() {
         clearInterval(timerInterval);
       }
-
       function toBengaliNumber(num) {
-        const bengaliDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+        const bengaliDigits = [
+          "০",
+          "১",
+          "২",
+          "৩",
+          "৪",
+          "৫",
+          "৬",
+          "৭",
+          "৮",
+          "৯",
+        ];
         return String(num).replace(/\d/g, (d) => bengaliDigits[d]);
       }
-
       function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
@@ -1260,7 +1218,6 @@
         }
         return array;
       }
-
       function generateQuestions() {
         const examContainer = document.querySelector("#exam");
         examContainer.innerHTML = "";
@@ -1270,48 +1227,36 @@
           questionDiv.classList.add("question-container");
           questionDiv.setAttribute("data-question", question.id);
           questionDiv.setAttribute("data-correct", question.correct);
-
           let optionsHTML = "";
-          const optionLabels = ["A", "B", "C", "D"];
-          const optionKeys = ["a", "b", "c", "d"];
-          for (let i = 0; i < optionKeys.length; i++) {
-            const key = optionKeys[i];
-            const label = optionLabels[i];
-            const optionText = question.options[key];
-            if (optionText) {
-              optionsHTML += `
-                <label class="option" data-option="${key}" tabindex="0" role="button" aria-label="বিকল্প ${label}: ${optionText}">
-                  <div class="circle">${label}</div>
-                  <span class="option-text">${optionText}</span>
-                </label>
-              `;
-            }
+          for (let option in question.options) {
+            optionsHTML += `
+              <label class="option" data-option="${option}">
+                <div class="circle">${option}</div>
+                <span class="option-text">${question.options[option]}</span>
+              </label>
+            `;
           }
-
           const explanationHTML = question.explanation
             ? `<div class="explanation-dropdown">
-                 <button class="explanation-btn">ব্যাখ্যা দেখো</button>
-                 <div class="explanation-content">
-                   <div class="explanation-label">ব্যাখ্যা:</div>
-                   ${question.explanation}
-                 </div>
-               </div>`
+                  <button class="explanation-btn">ব্যাখ্যা দেখো</button>
+                  <div class="explanation-content">
+                    <div class="explanation-label">ব্যাখ্যা:</div>
+                    ${question.explanation}
+                  </div>
+                </div>`
             : "";
-
           questionDiv.innerHTML = `
-            <p class="question-label">${toBengaliNumber(index + 1)}. ${question.question}</p>
-            <div class="options">
-              ${optionsHTML}
-            </div>
-            ${explanationHTML}
-          `;
+              <p class="question-label">${index + 1}. ${question.question}</p>
+              <div class="options">
+                ${optionsHTML}
+              </div>
+              ${explanationHTML}
+            `;
           examContainer.appendChild(questionDiv);
         });
-
         document.querySelectorAll(".question-container").forEach((container) => {
           container.style.display = "block";
         });
-
         document.querySelectorAll(".option").forEach((option) => {
           option.addEventListener(
             "click",
@@ -1332,7 +1277,6 @@
             { once: true }
           );
         });
-
         document.querySelectorAll(".explanation-btn").forEach((btn) => {
           btn.addEventListener("click", function () {
             const content = this.nextElementSibling;
@@ -1340,15 +1284,13 @@
             this.classList.toggle("active");
           });
         });
-
         const examInfo = document.getElementById("exam-info");
         if (examInfo) {
-          examInfo.innerText = `পূর্ণ নম্বরঃ ${toBengaliNumber(totalQuestions)} | সময়: ${toBengaliNumber(
-            Math.floor(totalQuestions / 2)
-          )} মিনিট`;
+          examInfo.innerText = `পূর্ণ নম্বরঃ ${toBengaliNumber(
+            totalQuestions
+          )}`;
         }
       }
-
       function initializeChart() {
         const ctx = document.getElementById("scoreChart").getContext("2d");
         chartInstance = new Chart(ctx, {
@@ -1394,152 +1336,183 @@
                       fillStyle: data.datasets[0].backgroundColor[i],
                       hidden: !chart.getDataVisibility(i),
                       index: i,
-                      generateLabelText: function (chart, item) {
-                        const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-                        const value = chart.data.datasets[0].data[item.index];
-                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                        return `${item.text}: ${toBengaliNumber(value)} (${toBengaliNumber(percentage)}%)`;
-                      },
                     }));
                   },
                 },
               },
               tooltip: {
-                callbacks: {
-                  label: function (context) {
-                    let label = context.label || "";
-                    if (label) {
-                      label += ": ";
-                    }
-                    const value = context.parsed;
-                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                    label += `${toBengaliNumber(value)} (${toBengaliNumber(percentage)}%)`;
-                    return label;
-                  },
+                backgroundColor: "rgba(0, 0, 0, 0.9)",
+                cornerRadius: 6,
+                titleFont: {
+                  family: '"Hind Siliguri", sans-serif',
+                  size: 14,
+                  weight: "bold",
                 },
+                bodyFont: {
+                  family: '"Hind Siliguri", sans-serif',
+                  size: 13,
+                },
+                padding: 10,
+                boxPadding: 5,
               },
+            },
+            animation: {
+              animateScale: true,
+              animateRotate: true,
+              duration: 1000,
+              easing: "easeOutQuart",
+            },
+            elements: {
+              arc: {
+                borderRadius: 8,
+              },
+            },
+            onClick: (e, elements) => {
+              if (elements.length > 0) {
+                const index = elements[0].index;
+                const filter = ["correct", "wrong", "unanswered"][index];
+                filterQuestions(filter);
+              } else {
+                filterQuestions("all");
+              }
             },
           },
         });
       }
-
-      function updateChart(correct, wrong, unanswered) {
-        chartInstance.data.datasets[0].data = [correct, wrong, unanswered];
-        chartInstance.update();
+      function filterQuestions(type) {
+        document.querySelectorAll(".question-container").forEach((question) => {
+          const status = question.getAttribute("data-status");
+          if (type === "all" || status === type) {
+            question.style.display = "block";
+          } else {
+            question.style.display = "none";
+          }
+        });
       }
-
-      function calculateScore() {
+      function showConfirmPopup() {
+        document.getElementById("confirmPopup").style.display = "block";
+      }
+      function confirmSubmit() {
+        document.getElementById("confirmPopup").style.display = "none";
         stopTimer();
-        let correct = 0;
-        let wrong = 0;
-        let answered = 0;
+        let score = 0,
+          answered = 0,
+          correct = 0,
+          wrong = 0,
+          unanswered = 0;
 
-        document.querySelectorAll(".question-container").forEach((questionDiv) => {
-          const correctOption = questionDiv.getAttribute("data-correct");
-          const selectedOptionElement = questionDiv.querySelector(".option.selected");
+        document
+          .querySelectorAll(".question-container")
+          .forEach((question) => {
+            let correctAnswer = question.getAttribute("data-correct");
+            let selectedOption = question.querySelector(".option.selected");
 
-          questionDiv.classList.add("locked");
-
-          questionDiv.querySelectorAll(".option").forEach((option) => {
-            const optionKey = option.getAttribute("data-option");
-            const circle = option.querySelector(".circle");
-            const optionText = option.querySelector(".option-text");
-
-            if (optionKey === correctOption) {
-              circle.style.backgroundColor = "green";
-              circle.style.color = "white";
-              optionText.classList.add("correct-text");
-            } else if (option === selectedOptionElement) {
-              circle.style.backgroundColor = "red";
-              circle.style.color = "white";
-              optionText.classList.add("incorrect-text");
+            // Mark correct answer for all questions
+            const correctOptionText = question.querySelector(
+              `[data-option="${correctAnswer}"] .option-text`
+            );
+            
+            if (selectedOption) {
+              answered++;
+              let chosenAnswer = selectedOption.getAttribute("data-option");
+              
+              if (chosenAnswer === correctAnswer) {
+                // Correct Answer
+                selectedOption
+                  .querySelector(".option-text")
+                  .classList.add("correct-text");
+                score += 1;
+                correct++;
+                question.setAttribute("data-status", "correct");
+              } else {
+                // Wrong Answer
+                selectedOption
+                  .querySelector(".option-text")
+                  .classList.add("incorrect-text");
+                correctOptionText.classList.add("correct-text"); // Highlight correct answer
+                score -= 0.25;
+                wrong++;
+                question.setAttribute("data-status", "wrong");
+              }
             } else {
-              option.classList.remove("selected");
+              // Unanswered
+              correctOptionText.classList.add("unattempted-text"); // Highlight correct answer as unattempted
+              unanswered++;
+              question.setAttribute("data-status", "unanswered");
+            }
+
+            // Show questions and explanations
+            question.style.display = "block";
+            const explanationDropdown = question.querySelector(
+              ".explanation-dropdown"
+            );
+            if (explanationDropdown) {
+              explanationDropdown.classList.add("visible");
             }
           });
 
-          if (selectedOptionElement) {
-            answered++;
-            const selectedOption = selectedOptionElement.getAttribute("data-option");
-            if (selectedOption === correctOption) {
-              correct++;
-            } else {
-              wrong++;
-            }
-          } else {
-            const questionLabel = questionDiv.querySelector(".question-label");
-            questionLabel.innerHTML += ` <span class="unattempted-text">(অনুত্তরিত)</span>`;
-          }
+        // 1. Prepare data for submission
+        const submissionData = {
+          serialNumber: serialNumber,
+          actionType: "exam_submit",
+          submissionTime: new Date().toISOString(),
+          finalScore: score.toFixed(2),
+          correctAnswers: correct,
+          wrongAnswers: wrong,
+          unanswered: unanswered,
+        };
+        
+        // 2. Submit data to Formspree immediately (This is the key change)
+        sendFormspreeData(submissionData, false); // Use fetch for final score
 
-          const explanationDropdown = questionDiv.querySelector(".explanation-dropdown");
-          if (explanationDropdown) {
-            explanationDropdown.style.display = "block";
-          }
-        });
+        // 3. Update Chart and Score Popup UI
+        const chartContainer = document.querySelector(".chart-container");
+        chartContainer.classList.add("visible");
+        if (!chartInstance) {
+          initializeChart();
+        }
+        chartInstance.data.datasets[0].data = [correct, wrong, unanswered];
+        chartInstance.update();
 
-        const unanswered = totalQuestions - answered;
-        const finalScore = correct * 1 - wrong * 0;
-
-        document.getElementById("popupSerial").innerText = serialNumber;
-        document.getElementById("totalQuestions").innerText = toBengaliNumber(totalQuestions);
+        // 4. Populate Score Popup with Bengali Numbers
+        document.getElementById("totalQuestions").innerText =
+          toBengaliNumber(totalQuestions);
         document.getElementById("answered").innerText = toBengaliNumber(answered);
-        document.getElementById("correctAnswers").innerText = toBengaliNumber(correct);
+        document.getElementById("correctAnswers").innerText =
+          toBengaliNumber(correct);
         document.getElementById("wrongAnswers").innerText = toBengaliNumber(wrong);
-        document.getElementById("unanswered").innerText = toBengaliNumber(unanswered);
-        document.getElementById("finalScore").innerText = toBengaliNumber(finalScore);
+        document.getElementById("unanswered").innerText =
+          toBengaliNumber(unanswered);
+        document.getElementById("finalScore").innerText = toBengaliNumber(
+          score.toFixed(2)
+        );
+        document.getElementById("popupSerial").innerText = serialNumber;
 
-        document.querySelector(".chart-container").classList.add("visible");
-        updateChart(correct, wrong, unanswered);
-
-        document.getElementById("formSerialNumber").value = serialNumber;
-        document.getElementById("formSubmissionTime").value = new Date().toISOString();
-        document.getElementById("formFinalScore").value = finalScore;
-        document.getElementById("formCorrectAnswers").value = correct;
-        document.getElementById("formWrongAnswers").value = wrong;
-        document.getElementById("formUnanswered").value = unanswered;
-
-        showPopup(document.getElementById("scorePopup"));
-        document.getElementById("submitBtn").disabled = true; // Disable instead of hide
+        // 5. Show Score Popup
+        document.getElementById("submitBtn").style.display = "none";
+        document.getElementById("scorePopup").style.display = "block";
       }
-
-      function showPopup(popupElement) {
-        popupElement.style.display = "block";
-        setTimeout(() => {
-          popupElement.style.transform = "translate(-50%, -50%)";
-          popupElement.style.opacity = "1";
-        }, 10);
-      }
-
-      function hidePopup(popupElement) {
-        popupElement.classList.add("slide-out");
-        setTimeout(() => {
-          popupElement.style.display = "none";
-          popupElement.classList.remove("slide-out");
-          popupElement.style.transform = "translate(-50%, -50%)";
-          popupElement.style.opacity = "1";
-        }, 500);
-      }
-
-      function showConfirmPopup() {
-        showPopup(document.getElementById("confirmPopup"));
-      }
-
-      function confirmSubmit() {
-        hidePopup(document.getElementById("confirmPopup"));
-        calculateScore();
-      }
-
       function cancelSubmit() {
-        hidePopup(document.getElementById("confirmPopup"));
+        document.getElementById("confirmPopup").style.display = "none";
       }
-
       function showErrorPopup() {
-        showPopup(document.getElementById("errorPopup"));
+        document.getElementById("errorPopup").style.display = "block";
+      }
+      function closeErrorPopup() {
+        document.getElementById("errorPopup").style.display = "none";
       }
 
-      function closeErrorPopup() {
-        hidePopup(document.getElementById("errorPopup"));
+      // Removed the document.getElementById("scoreForm").addEventListener("submit")
+      // because submission is now handled in confirmSubmit()
+      
+      function closePopup() {
+        const scorePopup = document.getElementById("scorePopup");
+        scorePopup.classList.add("slide-out");
+        setTimeout(() => {
+          scorePopup.style.display = "none";
+          scorePopup.classList.remove("slide-out");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }, 500);
       }
     </script>
   </body>
