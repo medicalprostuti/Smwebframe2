@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="bn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GK Free exam-01</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap");
+
+      body {
+        font-family: "Hind Siliguri", sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .container {
+        font-family: "Hind Siliguri", sans-serif;
+        width: 100%;
+        max-width: 800px; /* Added max-width for better readability */
+        margin: auto;
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        min-height: 80vh;
+      }
+
+      .exam-content {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      h1 {
+        color: #1b0b54;
+        text-align: center;
+        margin-bottom: 10px;
+      }
+
+      #timer {
+        font-size: 20px;
+        color: #1b0b54;
+        margin-bottom: 5px;
+        font-weight: normal;
+        text-align: center;
+      }
+
+      #exam-info {
+        font-size: 16px;
+        color: black;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      #exam {
+        width: 100%;
+        min-height: 100px;
+      }
+
+      .chart-container {
+        width: 200px;
+        height: 200px;
+        margin: 10px auto;
+        background-color: #f9f9f9;
+        border-radius: 15px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        display: none;
+        padding: 10px;
+      }
+
+      .chart-container.visible {
+        display: block;
+      }
+
+      .question-container {
+        text-align: left;
+        margin-bottom: 20px;
+        display: none;
+      }
+
+      .question-label {
+        font-weight: bold;
+        color: #1b0b54;
+        margin-bottom: 10px;
+      }
+
+      .options {
+        margin-top: 10px;
+      }
+
+      .option {
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 5px;
+        text-transform: uppercase;
+      }
+
+      .circle {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid #1b0b54;
+        margin-right: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #1b0b54;
+        font-weight: bold;
+        font-size: 18px;
+      }
+
+      .selected .circle {
+        background-color: #1b0b54;
+        color: white;
+      }
+
+      .correct-text {
+        color: green !important;
+      }
+
+      .incorrect-text {
+        color: #ff0800 !important;
+      }
+
+      .unattempted-text {
+        color: orange !important;
+      }
+
+      .button-container {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin-top: 20px;
+      }
+
+      #submitBtn {
+        font-family: "Hind Siliguri", sans-serif;
+        padding: 15px 30px;
+        background-color: #1b0b54;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: bold;
+        border-radius: 10px;
+        width: 200px;
+        transition: background-color 0.3s ease;
+      }
+
+      #submitBtn:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+      }
+
+      #submitBtn:hover:not(:disabled) {
+        background-color: #1b0b54;
+      }
+
+      .popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 20px;
+        width: 300px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        text-align: center;
+        display: none;
+        z-index: 1000;
+        transition: transform 0.5s ease, opacity 0.5s ease;
+      }
+
+      .popup.slide-out {
+        transform: translate(-50%, -100%);
+        opacity: 0;
+      }
+
+      .popup-header {
+        background-color: #1b0b54;
+        color: white;
+        padding: 10px;
+        font-size: 20px;
+        font-weight: bold;
+        border-radius: 10px 10px 0 0;
+      }
+
+      .popup-body {
+        padding: 15px;
+      }
+
+      .popup-body p {
+        margin: 10px 0;
+      }
+
+      .confirm-btn {
+        font-family: "Hind Siliguri", sans-serif;
+        background-color: #34c759;
+        color: white;
+        padding: 8px 15px;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        border-radius: 5px;
+        margin: 5px;
+      }
+
+      .confirm-btn:hover {
+        background-color: #28a745;
+      }
+
+      .cancel-btn {
+        background-color: #ff3b30;
+        color: white;
+        padding: 8px 15px;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        border-radius: 5px;
+        margin: 5px;
+      }
+
+      .cancel-btn:hover {
+        background-color: #e02b21;
+      }
+
+      .explanation-dropdown {
+        display: none;
+        margin-top: 10px;
+      }
+
+      .explanation-dropdown.visible {
+        display: block;
+      }
+
+      .explanation-btn {
+        background-color: #1b0b54;
+        color: white;
+        padding: 8px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        font-family: "Hind Siliguri", sans-serif;
+        width: 40%;
+        text-align: left;
+        position: relative;
+      }
+
+      .explanation-btn:hover {
+        background-color: #1b0b54;
+      }
+
+      .explanation-btn::after {
+        content: "▼";
+        position: absolute;
+        right: 10px;
+        font-size: 12px;
+      }
+
+      .explanation-btn.active::after {
+        content: "▲";
+      }
+
+      .explanation-content {
+        display: none;
+        padding: 15px;
+        background-color: #f9f9f9;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 14px;
+        color: #000000;
+        text-align: left;
+        max-height: 450px;
+        overflow-y: auto;
+        margin-top: 5px;
+      }
+
+      .explanation-content.visible {
+        display: block;
+      }
+
+      .explanation-content p {
+        margin: 0 0 10px 0;
+      }
+
+      .explanation-content ul {
+        margin: 0;
+        padding-left: 20px;
+      }
+
+      .explanation-content li {
+        margin-bottom: 5px;
+      }
+
+      .explanation-content strong {
+        color: #1b0b54;
+      }
+
+      .explanation-label {
+        font-weight: bold;
+        color: #1b0b54;
+        margin-bottom: 10px;
+        display: block;
+      }
+
+      .locked .option {
+        pointer-events: none;
+        cursor: default;
+      }
+
+      .locked .option.selected {
+        pointer-events: none;
+        cursor: default;
+      }
+
+      .serial-input-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      .serial-input-container p {
+        color: #1b0b54;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+
+      .serial-input-container input {
+        width: 100%;
+        max-width: 250px;
+        padding: 10px;
+        font-size: 16px;
+        text-align: center;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        margin-bottom: 15px;
+        font-family: "Hind Siliguri", sans-serif;
+      }
+
+      .serial-input-container input::placeholder {
+        font-family: "Hind Siliguri", sans-serif;
+      }
+
+      #startExamBtn {
+        font-family: "Hind Siliguri", sans-serif;
+        padding: 12px 25px;
+        background-color: #1b0b54;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        border-radius: 8px;
+        width: 150px;
+        transition: background-color 0.3s ease;
+      }
+
+      #startExamBtn:hover {
+        background-color: #1b0b54;
+      }
+
+      #errorPopup {
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        padding: 20px; /* Consistent padding */
+      }
+
+      #errorPopup .popup-body {
+        padding: 15px;
+      }
+
+      #errorPopup .popup-body p {
+        margin: 10px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container" id="examContainer">
+      <div class="exam-content">
+        <h1>GK Free exam-01</h1>
+        <div id="serialInputContainer" class="serial-input-container">
+          <p>তোমার সিরিয়াল নম্বরটি দাও:</p>
+          <input
+            type="text"
+            id="serialNumberInput"
+            placeholder="সিরিয়াল নম্বর"
+            maxlength="5"
+            pattern="[0-9]{5}"
+            inputmode="numeric"
+            aria-label="সিরিয়াল নম্বর প্রবেশ করান"
+          />
+          <button id="startExamBtn">শুরু করো</button>
+        </div>
+        <div id="examContentArea" style="display: none">
+          <div id="timer"></div>
+          <div id="exam-info"></div>
+          <div class="chart-container">
+            <canvas id="scoreChart"></canvas>
+          </div>
+          <div id="exam"></div>
+          <div class="button-container">
+            <button id="submitBtn">সাবমিট</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="popup" id="scorePopup">
+      <div class="popup-header">তোমার স্কোর</div>
+      <div class="popup-body">
+        <p><strong>সিরিয়াল নম্বর:</strong> <span id="popupSerial"></span></p>
+        <p><strong>মোট প্রশ্ন:</strong> <span id="totalQuestions"></span></p>
+        <p><strong>উত্তর দিয়েছো:</strong> <span style="color: #000000" id="answered"></span></p>
+        <p><strong>সঠিক উত্তর:</strong> <span style="color: #0ab853" id="correctAnswers"></span></p>
+        <p><strong>ভুল উত্তর:</strong> <span style="color: #f81010" id="wrongAnswers"></span></p>
+        <p><strong>অনুত্তরিত:</strong> <span style="color: #ffc801" id="unanswered"></span></p>
+        <p><strong>তোমার চূড়ান্ত স্কোর:</strong></p>
+        <h2 style="color: #1b0b54"><span id="finalScore"></span></h2>
+        <form id="scoreForm">
+          <input type="hidden" name="serialNumber" id="formSerialNumber" />
+          <input type="hidden" name="actionType" value="exam_submit" />
+          <input type="hidden" name="submissionTime" id="formSubmissionTime" />
+          <input type="hidden" name="finalScore" id="formFinalScore" />
+          <input type="hidden" name="correctAnswers" id="formCorrectAnswers" />
+          <input type="hidden" name="wrongAnswers" id="formWrongAnswers" />
+          <input type="hidden" name="unanswered" id="formUnanswered" />
+          <button type="submit" class="confirm-btn" style="background-color: #1b0b54">
+            <b>ওকে</b>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="popup" id="confirmPopup">
+      <div class="popup-header">কনফার্ম করো</div>
+      <div class="popup-body">
+        <p>
+          ভালো করে দেখে নাও! <br />
+          পরীক্ষা শেষ করতে চাও তো?
+        </p>
+        <button class="confirm-btn" onclick="confirmSubmit()">হ্যাঁ</button>
+        <button class="cancel-btn" onclick="cancelSubmit()">না</button>
+      </div>
+    </div>
+
+    <div class="popup" id="errorPopup">
+      <div class="popup-header">ত্রুটি</div>
+      <div class="popup-body">
+        <p>সিরিয়াল নম্বরটি অবশ্যই ৫-সংখ্যার ধনাত্মক সংখ্যা হতে হবে।</p>
+        <button class="confirm-btn" onclick="closeErrorPopup()">ওকে</button>
+      </div>
+    </div>
+
+    <script>
+      let chartInstance = null;
+      let serialNumber = "";
+      let examStartTime = null;
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const startExamBtn = document.getElementById("startExamBtn");
+        startExamBtn.addEventListener("click", startExam);
+
+        const submitBtn = document.getElementById("submitBtn");
+        submitBtn.addEventListener("click", showConfirmPopup);
+
+        // Initialize chart early
+        initializeChart();
+
+        // Prevent form resubmission
+        document.getElementById("scoreForm").addEventListener("submit", handleFormSubmit);
+
+        // Add keyboard accessibility
+        document.querySelectorAll(".option").forEach((option) => {
+          option.setAttribute("tabindex", "0");
+          option.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              option.click();
+            }
+          });
+        });
+      });
+
+      function handleFormSubmit(event) {
+        event.preventDefault();
+        const formData = new FormData(document.getElementById("scoreForm"));
+        const url = "https://formspree.io/f/xpwdgpby";
+
+        fetch(url, {
+          method: "POST",
+          body: formData,
+          headers: {
+            Accept: "application/json",
+          },
+        })
+          .then((response) => {
+            if (response.ok) {
+              alert("ফলাফল সফলভাবে জমা দেওয়া হয়েছে!");
+              hidePopup(document.getElementById("scorePopup"));
+            } else {
+              throw new Error("ফলাফল জমা দিতে সমস্যা হয়েছে।");
+            }
+          })
+          .catch((error) => {
+            console.error("Form submission error:", error);
+            alert("ফলাফল জমা দিতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করো।");
+          });
+      }
+
+      function startExam() {
+        const serialNumberInput = document.getElementById("serialNumberInput");
+        const inputSerial = serialNumberInput.value.trim();
+
+        // Stricter validation
+        if (!/^\d{5}$/.test(inputSerial) || inputSerial < 0) {
+          showErrorPopup();
+          return;
+        }
+
+        serialNumber = inputSerial;
+        examStartTime = new Date().toISOString();
+
+        // Send start time data to Formspree
+        sendFormspreeData({
+          serialNumber: serialNumber,
+          actionType: "exam_start",
+          startTime: examStartTime,
+        });
+
+        // Hide serial input and show exam content
+        document.getElementById("serialInputContainer").style.display = "none";
+        document.getElementById("examContentArea").style.display = "block";
+
+        generateQuestions();
+        startTimer();
+      }
+
+      function sendFormspreeData(data) {
+        const formData = new FormData();
+        for (const key in data) {
+          formData.append(key, data[key]);
+        }
+        const url = "https://formspree.io/f/xpwdgpby";
+        navigator.sendBeacon(url, formData);
+      }
+
+      const questions = [
+        {
+          id: 1,
+          question: "সিলেট কোন প্রাচীন জনপদের অন্তর্ভুক্ত ছিল?",
+          options: {
+            a: "হরিকেল",
+            b: "বরেন্দ্র",
+            c: "পুণ্ড্র",
+            d: "সমতট",
+          },
+          correct: "a",
+          explanation:
+            "<p>প্রাচীনকালে <strong>সিলেট</strong> অঞ্চল <strong>হরিকেল</strong> জনপদের অন্তর্ভুক্ত ছিল।</p>",
+        },
+        {
+          id: 2,
+          question: "বাংলার সবচেয়ে প্রাচীন জনপদ কোনটি?",
+          options: {
+            a: "হরিকেল",
+            b: "পুণ্ড্র",
+            c: "সমতট",
+            d: "তাম্রলিপ্ত",
+          },
+          correct: "b",
+          explanation:
+            "<p>বাংলার সবচেয়ে প্রাচীন জনপদ হলো <strong>পুণ্ড্র</strong> বা পুণ্ড্রবর্ধন।</p>",
+        },
+        {
+          id: 3,
+          question: "পাহাড়পুর বৌদ্ধ বিহারের নির্মাতা কে?",
+          options: {
+            a: "সমুদ্রগুপ্ত",
+            b: "চন্দ্রগুপ্ত",
+            c: "রামপাল",
+            d: "ধর্মপাল",
+          },
+          correct: "d",
+          explanation:
+            "<p>পাল রাজা <strong>ধর্মপাল</strong> পাহাড়পুর বৌদ্ধ বিহার (সোমপুর মহাবিহার) নির্মাণ করেন।</p>",
+        },
+        {
+          id: 4,
+          question: "বাংলার প্রাচীন জনপথ হরিকেল-এর বর্তমান নাম কী?",
+          options: {
+            a: "সিলেট ও চট্টগ্রাম",
+            b: "ঢাকা ও ময়মনসিংহ",
+            c: "কুমিল্লা ও নোয়াখালী",
+            d: "রাজশাহী ও রংপুর",
+          },
+          correct: "a",
+          explanation:
+            "<p>প্রাচীন <strong>হরিকেল</strong> জনপদ বর্তমান <strong>সিলেট ও চট্টগ্রাম</strong> অঞ্চল নিয়ে গঠিত ছিল।</p>",
+        },
+        {
+          id: 5,
+          question: "বাংলা সর্বপ্রাচীন জনপদের নাম কী?",
+          options: {
+            a: "পুণ্ড্র",
+            b: "তাম্রলিপি",
+            c: "গৌড়",
+            d: "হরিকেল",
+          },
+          correct: "a",
+          explanation:
+            "<p>বাংলার সর্বপ্রাচীন জনপদ হলো <strong>পুণ্ড্র</strong>।</p>",
+        },
+        {
+          id: 6,
+          question: "বাংলাদেশের বৃহত্তর ঢাকা জেলা প্রাচীনকালে কোন জনপদের অন্তর্ভুক্ত ছিল?",
+          options: {
+            a: "সমতট",
+            b: "হরিকেল",
+            c: "বঙ্গ",
+            d: "গৌড়",
+          },
+          correct: "c",
+          explanation:
+            "<p>বৃহত্তর <strong>ঢাকা</strong> জেলা প্রাচীনকালে <strong>বঙ্গ</strong> জনপদের অন্তর্ভুক্ত ছিল।</p>",
+        },
+        {
+          id: 7,
+          question: "বাংলার আদি অধিবাসীগণ কোন ভাষাভাষী ছিলেন?",
+          options: {
+            a: "বাংলা",
+            b: "সংস্কৃত",
+            c: "হিন্দি",
+            d: "অস্ট্রিক",
+          },
+          correct: "d",
+          explanation:
+            "<p>বাংলার আদি অধিবাসীগণ মূলত <strong>অস্ট্রিক</strong> ভাষাভাষী ছিলেন।</p>",
+        },
+        {
+          id: 8,
+          question: "বাংলাদেশের সবচেয়ে প্রাচীন বসতি কোনটি?",
+          options: {
+            a: "ময়নামতি",
+            b: "পুণ্ড্রবর্ধন",
+            c: "পাহাড়পুর",
+            d: "সোনারগাঁও",
+          },
+          correct: "b",
+          explanation:
+            "<p><strong>পুণ্ড্রবর্ধন</strong> (মহাস্থানগড়) বাংলাদেশের সবচেয়ে প্রাচীন বসতি।</p>",
+        },
+        {
+          id: 9,
+          question: "প্রাচীন বাংলার হরিকেল জনপদ অঞ্চলভুক্ত এলাকা-",
+          options: {
+            a: "রাজশাহী",
+            b: "দিনাজপুর",
+            c: "খুলনা",
+            d: "চট্টগ্রাম",
+          },
+          correct: "d",
+          explanation:
+            "<p><strong>হরিকেল</strong> জনপদ সিলেট ও <strong>চট্টগ্রাম</strong> অঞ্চলভুক্ত এলাকা ছিল।</p>",
+        },
+        {
+          id: 10,
+          question: "বাংলার সর্বপ্রাচীন জনপদের নাম কি?",
+          options: {
+            a: "পুণ্ড্র",
+            b: "তাম্রলিপ্ত",
+            c: "গৌড়",
+            d: "হরিকেল",
+          },
+          correct: "a",
+          explanation:
+            "<p>বাংলার সর্বপ্রাচীন জনপদ হলো <strong>পুণ্ড্র</strong>।</p>",
+        },
+        {
+          id: 11,
+          question: "বাঙালি জাতির প্রধান অংশ কোন মূল জাতিগোষ্ঠীর অন্তর্ভুক্ত।",
+          options: {
+            a: "দ্রাবিড়",
+            b: "নেগ্রিটো",
+            c: "ভোটচীন",
+            d: "অস্ট্রিক",
+          },
+          correct: "d",
+          explanation:
+            "<p>বাঙালি জাতির প্রধান অংশ <strong>অস্ট্রিক</strong> মূল জাতিগোষ্ঠীর অন্তর্ভুক্ত।</p>",
+        },
+        {
+          id: 12,
+          question: "প্রাচীন চন্দ্রদ্বীপের বর্তমান নাম কি?",
+          options: {
+            a: "মালদ্বীপ",
+            b: "সন্দ্বীপ",
+            c: "সিলেট",
+            d: "বরিশাল",
+          },
+          correct: "d",
+          explanation:
+            "<p>প্রাচীন <strong>চন্দ্রদ্বীপ</strong> জনপদের বর্তমান নাম <strong>বরিশাল</strong>।</p>",
+        },
+        {
+          id: 13,
+          question: "প্রাচীন 'পুণ্ড্রনগর' কোথায় অবস্থিত?",
+          options: {
+            a: "ময়নামতি",
+            b: "বিক্রমপুর",
+            c: "মহাস্থানগড়",
+            d: "পাহাড়পুর",
+          },
+          correct: "c",
+          explanation:
+            "<p>প্রাচীন <strong>পুণ্ড্রনগর</strong> বর্তমানে <strong>মহাস্থানগড়</strong> নামে পরিচিত।</p>",
+        },
+        {
+          id: 14,
+          question: "বর্তমান ঢাকা জেলা প্রাচীনকালে কোন জনপদের অন্তর্ভুক্ত ছিল?",
+          options: {
+            a: "সমতট",
+            b: "পুণ্ড্র",
+            c: "বঙ্গ",
+            d: "হরিকেল",
+          },
+          correct: "c",
+          explanation:
+            "<p>বর্তমান <strong>ঢাকা</strong> জেলা প্রাচীনকালে <strong>বঙ্গ</strong> জনপদের অন্তর্ভুক্ত ছিল।</p>",
+        },
+        {
+          id: 15,
+          question: '"ঢাকা গেইট" কে নির্মাণ করেন?',
+          options: {
+            a: "মীর জুমলা",
+            b: "শের শাহ সুরি",
+            c: "শাহ সুজা",
+            d: "শায়েস্তা খান",
+          },
+          correct: "a",
+          explanation:
+            "<p><strong>ঢাকা গেইট</strong> বা মীর জুমলার গেট নির্মাণ করেন মুঘল সুবেদার <strong>মীর জুমলা</strong>।</p>",
+        },
+        {
+          id: 16,
+          question: "অধিবর্ষ ব্যতিত বাংলা বর্ষপঞ্জিতে ৩১ দিনের মাস কয়টি?",
+          options: {
+            a: "৬টি",
+            b: "৫টি",
+            c: "৭টি",
+            d: "৪টি",
+          },
+          correct: "a",
+          explanation:
+            "<p>অধিবর্ষ ব্যতিত বাংলা বর্ষপঞ্জিতে <strong>৬টি</strong> মাস ৩১ দিনে হয় (বৈশাখ থেকে ভাদ্র)।</p>",
+        },
+        {
+          id: 17,
+          question:
+            "মুঘল আমলে প্রাদেশিক রাজধানীর দেওয়ানী ও ফৌজদারী মামলার নিষ্পত্তিকারী প্রধান বিচারপতির উপাধি ছিল নিম্নের কোনটি?",
+          options: {
+            a: "ফতুয়ায়ে আলমগিরি",
+            b: "মুসলিম ওলামা",
+            c: "কাজীউল কুজাত",
+            d: "কাজী",
+          },
+          correct: "c",
+          explanation:
+            "<p>মুঘল আমলে প্রাদেশিক রাজধানীর প্রধান বিচারপতির উপাধি ছিল <strong>কাজীউল কুজাত</strong>।</p>",
+        },
+        {
+          id: 18,
+          question: "বাংলার প্রথম স্বাধীন নবাব কে ছিলেন?",
+          options: {
+            a: "শশাঙ্ক",
+            b: "মুর্শিদ কুলি খান",
+            c: "সিরাজউদ্দৌলা",
+            d: "আব্বাস আলী খান",
+          },
+          correct: "b",
+          explanation:
+            "<p><strong>মুর্শিদ কুলি খান</strong> ছিলেন বাংলার প্রথম স্বাধীন নবাব।</p>",
+        },
+        {
+          id: 19,
+          question: "ঢাকা গেইট এর নির্মাতা কে?",
+          options: {
+            a: "শায়েস্তা খান",
+            b: "নবাব আব্দুল গণি",
+            c: "লর্ড কার্জন",
+            d: "মীর জুমলা",
+          },
+          correct: "d",
+          explanation:
+            "<p><strong>ঢাকা গেইট</strong> নির্মাণ করেন <strong>মীর জুমলা</strong>।</p>",
+        },
+        {
+          id: 20,
+          question: "পলাশী যুদ্ধে কবে সংঘটিত হয়েছিল?",
+          options: {
+            a: "জুন ২৪, ১৭৫৭",
+            b: "জুন ২৩, ১৭৫৭",
+            c: "জুন ২৫, ১৭৫৭",
+            d: "জুন ২২, ১৭৫৭",
+          },
+          correct: "b",
+          explanation:
+            "<p>পলাশীর যুদ্ধ <strong>২৩ জুন, ১৭৫৭</strong> সালে সংঘটিত হয়েছিল।</p>",
+        },
+        {
+          id: 21,
+          question: "নিম্নের মুঘল সম্রাটদের মধ্যে কে প্রথম আত্মজীবনী লিখেছিলেন?",
+          options: {
+            a: "আকবর",
+            b: "বাবর",
+            c: "শাহজাহান",
+            d: "হুমায়ুন",
+          },
+          correct: "b",
+          explanation:
+            "<p>মুঘল সম্রাট <strong>বাবর</strong> (জহির উদ্দিন মুহাম্মদ বাবর) প্রথম আত্মজীবনী (তুজুক-ই-বাবরি) লিখেছিলেন।</p>",
+        },
+        {
+          id: 22,
+          question: "বাংলাদেশের প্রথম স্বাধীন নবাব কে?",
+          options: {
+            a: "নবাব সিরাজউদ্দৌলা",
+            b: "মুর্শিদকুলী খান",
+            c: "ইলিয়াস শাহ",
+            d: "আলাউদ্দিন হুসাইন শাহ",
+          },
+          correct: "b",
+          explanation:
+            "<p><strong>মুর্শিদকুলী খান</strong> ছিলেন বাংলার প্রথম স্বাধীন নবাব।</p>",
+        },
+        {
+          id: 23,
+          question: "বাংলা নামের উৎপত্তির বিষয়টি কোন গ্রন্থে সর্বাধিক উল্লেখিত হয়েছে।",
+          options: {
+            a: "আলমগীরনামা",
+            b: "আইন-ই-আকবরী",
+            c: "আকবরনামা",
+            d: "তুজুক-ই-আকবরী",
+          },
+          correct: "b",
+          explanation:
+            "<p><strong>আইন-ই-আকবরী</strong> গ্রন্থে বাংলা নামের উৎপত্তির বিষয়টি সর্বাধিক উল্লেখিত হয়েছে।</p>",
+        },
+        {
+          id: 24,
+          question: "ঢাকার লালবাগের দুর্গ নির্মাণ করেন-",
+          options: {
+            a: "শাহ সুজা",
+            b: "শায়েস্তা খান",
+            c: "মীর জুমলা",
+            d: "সুবেদার ইসলাম খান",
+          },
+          correct: "b",
+          explanation:
+            "<p><strong>লালবাগ কেল্লার</strong> অসমাপ্ত অংশ নির্মাণ করেন <strong>শায়েস্তা খান</strong>।</p>",
+        },
+        {
+          id: 25,
+          question: "কে বাংলা সাল গণনা শুরু করেন?",
+          options: {
+            a: "লক্ষা সেন",
+            b: "ইলিয়াস শাহ",
+            c: "বিজয় সেন",
+            d: "আকবর",
+          },
+          correct: "d",
+          explanation:
+            "<p>মুঘল সম্রাট <strong>আকবর</strong> বাংলা সাল গণনা শুরু করেন।</p>",
+        },
+        {
+          id: 26,
+          question: "ঢাকায় সর্বপ্রথম কবে বাংলার রাজধানী স্থাপিত হয়?",
+          options: {
+            a: "১২০৬",
+            b: "১৩২০",
+            c: "১৬১০",
+            d: "১৫২৬",
+          },
+          correct: "c",
+          explanation:
+            "<p>মুঘল সুবেদার ইসলাম খান <strong>১৬১০</strong> সালে ঢাকায় বাংলার রাজধানী স্থাপন করেন।</p>",
+        },
+        {
+          id: 27,
+          question:
+            "ঢাকায় বাংলার রাজধানী স্থাপনের সময় মুঘল সুবেদার কে ছিলেন?",
+          options: {
+            a: "ইসলাম খান",
+            b: "ইব্রাহীম খান",
+            c: "শায়েস্তা খাঁ",
+            d: "মীর জুমলা",
+          },
+          correct: "a",
+          explanation:
+            "<p>ঢাকায় বাংলার রাজধানী স্থাপনের সময় মুঘল সুবেদার ছিলেন <strong>ইসলাম খান</strong>।</p>",
+        },
+        {
+          id: 28,
+          question: "নিচের কোন পর্যটক সোনারগাঁও এসেছিলেন?",
+          options: {
+            a: "ফা-হিয়েন",
+            b: "ইবনে বতুতা",
+            c: "মার্কো পোলো",
+            d: "হিউয়েন সাং",
+          },
+          correct: "b",
+          explanation:
+            "<p>বিখ্যাত পর্যটক <strong>ইবনে বতুতা</strong> সোনারগাঁও এসেছিলেন।</p>",
+        },
+        {
+          id: 29,
+          question: "বাংলার নববর্ষ পহেলা বৈশাখ চালু করেছিলেন-",
+          options: {
+            a: "ফখরুদ্দিন মোবারক শাহ",
+            b: "ইলিয়াস শাহ",
+            c: "সম্রাট আকবর",
+            d: "সম্রাট বাবর",
+          },
+          correct: "c",
+          explanation:
+            "<p>সম্রাট <strong>আকবর</strong> বাংলার নববর্ষ <strong>পহেলা বৈশাখ</strong> চালু করেছিলেন।</p>",
+        },
+        {
+          id: 30,
+          question:
+            "কোন মুঘল সুবেদার চট্টগ্রাম দখল করে এর নাম রাখেন ইসলামাবাদ?",
+          options: {
+            a: "ইসলাম খান",
+            b: "রাজা মানসিংহ",
+            c: "মীর জুমলা",
+            d: "শায়েস্তা খান",
+          },
+          correct: "d",
+          explanation:
+            "<p>মুঘল সুবেদার <strong>শায়েস্তা খান</strong> চট্টগ্রাম দখল করে এর নাম রাখেন <strong>ইসলামাবাদ</strong>।</p>",
+        },
+        {
+          id: 31,
+          question: "পরী বিবি কে ছিলেন?",
+          options: {
+            a: "আওরঙ্গজেবের কন্যা",
+            b: "শায়েস্তা খানের কন্যা",
+            c: "মুর্শিদকুলী খানের স্ত্রী",
+            d: "আজিমুসশানের মাতা",
+          },
+          correct: "b",
+          explanation:
+            "<p><strong>পরী বিবি</strong> ছিলেন মুঘল সুবেদার <strong>শায়েস্তা খানের কন্যা</strong>।</p>",
+        },
+        {
+          id: 32,
+          question: "ভারতীয় উপমহাদেশে প্রথম পুলিশ ব্যবস্থা কে চালু করেন?",
+          options: {
+            a: "মিং বার্ড",
+            b: "সম্রাট আকবর",
+            c: "লর্ড কর্নওয়ালিস",
+            d: "সম্রাট শাহজাহান",
+          },
+          correct: "c",
+          explanation:
+            "<p>ব্রিটিশ ভারতে গভর্নর জেনারেল <strong>লর্ড কর্নওয়ালিস</strong> প্রথম <strong>পুলিশ ব্যবস্থা</strong> চালু করেন।</p>",
+        },
+        {
+          id: 33,
+          question: "ছিয়াত্তরের মন্বন্তর হয় কত সালে?",
+          options: {
+            a: "বাংলা ১০৭৬ সালে",
+            b: "বাংলা ১৩৭৬",
+            c: "বাংলা ১১৭৬ সালে",
+            d: "বাংলা ১৫৭৬",
+          },
+          correct: "c",
+          explanation:
+            "<p><strong>ছিয়াত্তরের মন্বন্তর</strong> হয়েছিল বাংলা <strong>১১৭৬</strong> সালে (খ্রিস্টাব্দ ১৭৭০)।</p>",
+        },
+        {
+          id: 34,
+          question: "বাংলার 'ছিয়াত্তরের মন্বন্তর' এর সময় কাল?",
+          options: {
+            a: "১৭৭০ খ্রিস্টাব্দ",
+            b: "১৭৬০ খ্রিস্টাব্দ",
+            c: "১৭৬৫ খ্রিস্টাব্দ",
+            d: "১৭৫৬ খ্রিস্টাব্দ",
+          },
+          correct: "a",
+          explanation:
+            "<p>ছিয়াত্তরের মন্বন্তর হয়েছিল <strong>১৭৭০ খ্রিস্টাব্দে</strong>।</p>",
+        },
+        {
+          id: 35,
+          question:
+            "লর্ড ক্যানিং ভারত উপমহাদেশে প্রথম কোন ব্যবস্থা চালু করেন?",
+          options: {
+            a: "চিরস্থায়ী বন্দোবস্ত ব্যবস্থা",
+            b: "সতীদাহ নিবারণ ব্যবস্থা",
+            c: "দ্বৈত শাসন ব্যবস্থা",
+            d: "পুলিশ ব্যবস্থা",
+          },
+          correct: "d",
+          explanation:
+            "<p>লর্ড ক্যানিং এর সময় ১৮৬১ সালে উপমহাদেশে আধুনিক <strong>পুলিশ ব্যবস্থা</strong> চালু করা হয়।</p>",
+        },
+        {
+          id: 36,
+          question: "চিরস্থায়ী বন্দোবস্ত প্রবর্তন করা হয় কত সনে?",
+          options: {
+            a: "১৭৫৭",
+            b: "১৭৭০",
+            c: "১৮৫৭",
+            d: "১৭৯৩",
+          },
+          correct: "d",
+          explanation:
+            "<p><strong>চিরস্থায়ী বন্দোবস্ত</strong> প্রবর্তন করা হয় <strong>১৭৯৩</strong> সনে।</p>",
+        },
+        {
+          id: 37,
+          question: "উপমহাদেশে প্রথম গভর্নর জেনারেল ছিলেন-",
+          options: {
+            a: "লর্ড ওয়াজেল",
+            b: "লর্ড ক্যানিং",
+            c: "লর্ড বেন্টিয়",
+            d: "লর্ড কার্জন",
+          },
+          correct: "c",
+          explanation:
+            "<p>ওয়ারেন হেস্টিংস বাংলার প্রথম গভর্নর জেনারেল ছিলেন। <strong>লর্ড উইলিয়াম বেন্টিঙ্ক</strong> ব্রিটিশ ভারতের প্রথম গভর্নর জেনারেল ছিলেন।</p>",
+        },
+        {
+          id: 38,
+          question: "ইউরোপীয় বণিকদের মধ্যে বাংলায় প্রথম কারা এসেছিল?",
+          options: {
+            a: "পর্তুগিজরা",
+            b: "ইংরেজরা",
+            c: "ওলন্দাজরা",
+            d: "ফরাসিরা",
+          },
+          correct: "a",
+          explanation:
+            "<p>ইউরোপীয় বণিকদের মধ্যে <strong>পর্তুগিজরা</strong> বাংলায় প্রথম এসেছিল।</p>",
+        },
+        {
+          id: 39,
+          question:
+            "ইংরেজ ইস্ট ইন্ডিয়া কোম্পানি কখন বাংলা, বিহার ও উড়িষ্যার দেওয়ানি লাভ করেন?",
+          options: {
+            a: "১৬৯০",
+            b: "১৭৬৫",
+            c: "১৭৯৩",
+            d: "১৮২৯",
+          },
+          correct: "b",
+          explanation:
+            "<p>ইংরেজ ইস্ট ইন্ডিয়া কোম্পানি <strong>১৭৬৫</strong> সালে বাংলা, বিহার ও উড়িষ্যার <strong>দেওয়ানি</strong> লাভ করে।</p>",
+        },
+        {
+          id: 40,
+          question:
+            "চিরস্থায়ী বন্দোবস্ত প্রথা প্রবর্তন করেন কোন ইংরেজ শাসক?",
+          options: {
+            a: "লর্ড উইলিয়াম বেন্টিক",
+            b: "লর্ড ক্লাইভ",
+            c: "লর্ড কর্নওয়ালিস",
+            d: "ওয়ারেন হেস্টিংস",
+          },
+          correct: "c",
+          explanation:
+            "<p><strong>লর্ড কর্নওয়ালিস</strong> <strong>চিরস্থায়ী বন্দোবস্ত</strong> প্রথা প্রবর্তন করেন।</p>",
+        },
+        {
+          id: 41,
+          question:
+            "ব্রিটিশ বণিকদের বিরুদ্ধে একজন চাকমা জুমিয়া নেতা বিদ্রোহের পতাকা উড়িয়েছিলেন, তাঁর নাম-",
+          options: {
+            a: "রাজা ত্রিবিদ রায়",
+            b: "রাজা ত্রিভূবন চাকমা",
+            c: "মুখ্য খান",
+            d: "জোয়ান বকস খান",
+          },
+          correct: "d",
+          explanation:
+            "<p>ব্রিটিশ বণিকদের বিরুদ্ধে চাকমা জুমিয়া নেতা <strong>জোয়ান বকস খান</strong> বিদ্রোহের পতাকা উড়িয়েছিলেন।</p>",
+        },
+        {
+          id: 42,
+          question:
+            "পূর্ব বাংলার ও আসামের প্রথম লেফটেন্যান্ট গভর্নর কে ছিলেন?",
+          options: {
+            a: "ফুলার",
+            b: "কার্জন",
+            c: "মিন্টো",
+            d: "হেস্টিংস",
+          },
+          correct: "a",
+          explanation:
+            "<p>পূর্ব বাংলা ও আসাম প্রদেশের প্রথম লেফটেন্যান্ট গভর্নর ছিলেন <strong>স্যার ব্যামফিল্ড ফুলার</strong>।</p>",
+        },
+        {
+          id: 43,
+          question: "বাংলাদেশের সর্ববৃহৎ গণহত্যাটি কোথায় হয়?",
+          options: {
+            a: "সোহাগপুর বিধবা পল্লী",
+            b: "চুকনগর",
+            c: "রায়ের বাজার",
+            d: "হাসামদিয়া",
+          },
+          correct: "b",
+          explanation:
+            "<p>বাংলাদেশের সর্ববৃহৎ গণহত্যাটি হয়েছিল <strong>চুকনগরে</strong>।</p>",
+        },
+        {
+          id: 44,
+          question:
+            'রাজশাহী বিশ্ববিদ্যালয়ের ভাস্কর্য "সাবাশ বাংলাদেশ" এর ভাস্কর কে?',
+          options: {
+            a: "মৃনাল হক",
+            b: "রূপম রায়",
+            c: "নভেরা আহমেদ",
+            d: "নিতুন কুণ্ডু",
+          },
+          correct: "b",
+          explanation:
+            "<p>রাজশাহী বিশ্ববিদ্যালয়ের ভাস্কর্য <strong>\"সাবাশ বাংলাদেশ\"</strong> এর ভাস্কর <strong>রূপম রায়</strong>।</p>",
+        },
+        {
+          id: 45,
+          question: "'সাভার জাতীয় স্মৃতিসৌধ' এর স্থপতি কে?",
+          options: {
+            a: "সৈয়দ মইনুল হোসেন",
+            b: "মাজহারুল ইসলাম",
+            c: "মুনাল হক",
+            d: "আব্দুর রাজ্জাক",
+          },
+          correct: "a",
+          explanation:
+            "<p><strong>সাভার জাতীয় স্মৃতিসৌধ</strong> এর স্থপতি <strong>সৈয়দ মইনুল হোসেন</strong>।</p>",
+        },
+        {
+          id: 46,
+          question: "স্বাধীনতার পর মুক্তিযুদ্ধের প্রথম স্থাপত্য কোনটি?",
+          options: {
+            a: "মোদের গরব",
+            b: "সাবাশ বাংলাদেশ",
+            c: "অপরাজেয় বাংলা",
+            d: "জাগ্রত চৌরঙ্গী",
+          },
+          correct: "d",
+          explanation:
+            "<p>স্বাধীনতার পর মুক্তিযুদ্ধের প্রথম স্থাপত্য হলো <strong>জাগ্রত চৌরঙ্গী</strong> (গাজীপুর)।</p>",
+        },
+        {
+          id: 47,
+          question:
+            "কোন বিখ্যাত গায়ক মুক্তিযুদ্ধ চলাকালীন সময়ে বাংলাদেশের জন্য নিউইয়র্কে কনসার্ট করে অর্থ সংগ্রহ করেন?",
+          options: {
+            a: "এন্ডিভস প্রিসলি",
+            b: "লতা মুঙ্গেশকর",
+            c: "মুহাম্মদ রাফি",
+            d: "জর্জ হ্যারিসন",
+          },
+          correct: "d",
+          explanation:
+            "<p><strong>জর্জ হ্যারিসন</strong> ১৯৭১ সালে <strong>'কনসার্ট ফর বাংলাদেশ'</strong> আয়োজন করেন।</p>",
+        },
+        {
+          id: 48,
+          question:
+            "মুক্তিযুদ্ধ চলাকালীন সময়ে বাংলাদেশকে কয়টি সেক্টরে ভাগ করা হয়েছিল?",
+          options: {
+            a: "১০",
+            b: "৯",
+            c: "১১",
+            d: "১৩",
+          },
+          correct: "c",
+          explanation:
+            "<p>মুক্তিযুদ্ধ চলাকালীন সময়ে বাংলাদেশকে <strong>১১টি</strong> সেক্টরে ভাগ করা হয়েছিল।</p>",
+        },
+        {
+          id: 49,
+          question:
+            "বাংলাদেশের স্বাধীনতা যুদ্ধে 'বীর প্রতীক' খেতাবপ্রাপ্ত নারীদ্বয়ের নাম কি?",
+          options: {
+            a: "তারামন বিবি ও সিতারা বেগম",
+            b: "সিতারা খাতুন ও তারামন বিবি",
+            c: "সেলিনা বেগম ও সিতারা আখতার",
+            d: "ফেরদৌসি প্রিয়ভাষিনী ও জাহানারা ইমাম",
+          },
+          correct: "b",
+          explanation:
+            "<p>স্বাধীনতা যুদ্ধে 'বীর প্রতীক' খেতাবপ্রাপ্ত নারীদ্বয় হলেন <strong>সিতারা বেগম</strong> (ডা. সিতারা বেগম) ও <strong>তারামন বিবি</strong>।</p>",
+        },
+        {
+          id: 50,
+          question: "'অস্থায়ী প্রবাসী সরকার' কবে গঠিত হয়?",
+          options: {
+            a: "১২ এপ্রিল, ১৯৭১",
+            b: "১০ এপ্রিল, ১৯৭১",
+            c: "১৪ এপ্রিল, ১৯৭১",
+            d: "১৭ এপ্রিল, ১৯৭১",
+          },
+          correct: "b",
+          explanation:
+            "<p><strong>অস্থায়ী প্রবাসী সরকার</strong> (মুজিবনগর সরকার) <strong>১০ এপ্রিল, ১৯৭১</strong> গঠিত হয়।</p>",
+        },
+      ];
+
+      const totalQuestions = questions.length;
+      let timeLeft = Math.floor(totalQuestions / 2) * 60;
+      const timerElement = document.getElementById("timer");
+      let timerInterval;
+
+      function updateTimer() {
+        if (timeLeft <= 0) {
+          timerElement.innerText = "০ মিনিট ০ সেকেন্ড";
+          stopTimer();
+          confirmSubmit();
+          return;
+        }
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        timerElement.innerText = `${toBengaliNumber(minutes)} মিনিট ${toBengaliNumber(seconds)} সেকেন্ড`;
+        timeLeft--;
+      }
+
+      function startTimer() {
+        timerElement.innerText = `${toBengaliNumber(Math.floor(timeLeft / 60))} মিনিট ${toBengaliNumber(timeLeft % 60)} সেকেন্ড`;
+        timerInterval = setInterval(updateTimer, 1000);
+      }
+
+      function stopTimer() {
+        clearInterval(timerInterval);
+      }
+
+      function toBengaliNumber(num) {
+        const bengaliDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+        return String(num).replace(/\d/g, (d) => bengaliDigits[d]);
+      }
+
+      function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+      }
+
+      function generateQuestions() {
+        const examContainer = document.querySelector("#exam");
+        examContainer.innerHTML = "";
+        const shuffledQuestions = shuffleArray([...questions]);
+        shuffledQuestions.forEach((question, index) => {
+          const questionDiv = document.createElement("div");
+          questionDiv.classList.add("question-container");
+          questionDiv.setAttribute("data-question", question.id);
+          questionDiv.setAttribute("data-correct", question.correct);
+
+          let optionsHTML = "";
+          const optionLabels = ["A", "B", "C", "D"];
+          const optionKeys = ["a", "b", "c", "d"];
+          for (let i = 0; i < optionKeys.length; i++) {
+            const key = optionKeys[i];
+            const label = optionLabels[i];
+            const optionText = question.options[key];
+            if (optionText) {
+              optionsHTML += `
+                <label class="option" data-option="${key}" tabindex="0" role="button" aria-label="বিকল্প ${label}: ${optionText}">
+                  <div class="circle">${label}</div>
+                  <span class="option-text">${optionText}</span>
+                </label>
+              `;
+            }
+          }
+
+          const explanationHTML = question.explanation
+            ? `<div class="explanation-dropdown">
+                 <button class="explanation-btn">ব্যাখ্যা দেখো</button>
+                 <div class="explanation-content">
+                   <div class="explanation-label">ব্যাখ্যা:</div>
+                   ${question.explanation}
+                 </div>
+               </div>`
+            : "";
+
+          questionDiv.innerHTML = `
+            <p class="question-label">${toBengaliNumber(index + 1)}. ${question.question}</p>
+            <div class="options">
+              ${optionsHTML}
+            </div>
+            ${explanationHTML}
+          `;
+          examContainer.appendChild(questionDiv);
+        });
+
+        document.querySelectorAll(".question-container").forEach((container) => {
+          container.style.display = "block";
+        });
+
+        document.querySelectorAll(".option").forEach((option) => {
+          option.addEventListener(
+            "click",
+            function (e) {
+              e.preventDefault();
+              const parent = this.closest(".question-container");
+              if (parent.classList.contains("locked")) return;
+              parent.classList.add("locked");
+              parent.querySelectorAll(".option").forEach((el) => {
+                if (el !== this) {
+                  el.style.pointerEvents = "none";
+                  el.style.cursor = "default";
+                }
+                el.classList.remove("selected");
+              });
+              this.classList.add("selected");
+            },
+            { once: true }
+          );
+        });
+
+        document.querySelectorAll(".explanation-btn").forEach((btn) => {
+          btn.addEventListener("click", function () {
+            const content = this.nextElementSibling;
+            content.classList.toggle("visible");
+            this.classList.toggle("active");
+          });
+        });
+
+        const examInfo = document.getElementById("exam-info");
+        if (examInfo) {
+          examInfo.innerText = `পূর্ণ নম্বরঃ ${toBengaliNumber(totalQuestions)} | সময়: ${toBengaliNumber(
+            Math.floor(totalQuestions / 2)
+          )} মিনিট`;
+        }
+      }
+
+      function initializeChart() {
+        const ctx = document.getElementById("scoreChart").getContext("2d");
+        chartInstance = new Chart(ctx, {
+          type: "pie",
+          data: {
+            labels: ["ঠিক উত্তর", "ভুল উত্তর", "অনুত্তরিত"],
+            datasets: [
+              {
+                data: [0, 0, 0],
+                backgroundColor: ["#34c759", "#ff3b30", "#007aff"],
+                borderColor: "#fff",
+                borderWidth: 2,
+                hoverOffset: 10,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "10%",
+            layout: {
+              padding: 10,
+            },
+            plugins: {
+              legend: {
+                position: "bottom",
+                labels: {
+                  font: {
+                    family: '"Hind Siliguri", sans-serif',
+                    size: 13,
+                    weight: "bold",
+                  },
+                  color: "#333",
+                  padding: 12,
+                  boxWidth: 14,
+                  generateLabels: (chart) => {
+                    const data = chart.data;
+                    return data.labels.map((label, i) => ({
+                      text: label,
+                      font: {
+                        family: '"Hind Siliguri", sans-serif',
+                      },
+                      fillStyle: data.datasets[0].backgroundColor[i],
+                      hidden: !chart.getDataVisibility(i),
+                      index: i,
+                      generateLabelText: function (chart, item) {
+                        const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                        const value = chart.data.datasets[0].data[item.index];
+                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                        return `${item.text}: ${toBengaliNumber(value)} (${toBengaliNumber(percentage)}%)`;
+                      },
+                    }));
+                  },
+                },
+              },
+              tooltip: {
+                callbacks: {
+                  label: function (context) {
+                    let label = context.label || "";
+                    if (label) {
+                      label += ": ";
+                    }
+                    const value = context.parsed;
+                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                    label += `${toBengaliNumber(value)} (${toBengaliNumber(percentage)}%)`;
+                    return label;
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+
+      function updateChart(correct, wrong, unanswered) {
+        chartInstance.data.datasets[0].data = [correct, wrong, unanswered];
+        chartInstance.update();
+      }
+
+      function calculateScore() {
+        stopTimer();
+        let correct = 0;
+        let wrong = 0;
+        let answered = 0;
+
+        document.querySelectorAll(".question-container").forEach((questionDiv) => {
+          const correctOption = questionDiv.getAttribute("data-correct");
+          const selectedOptionElement = questionDiv.querySelector(".option.selected");
+
+          questionDiv.classList.add("locked");
+
+          questionDiv.querySelectorAll(".option").forEach((option) => {
+            const optionKey = option.getAttribute("data-option");
+            const circle = option.querySelector(".circle");
+            const optionText = option.querySelector(".option-text");
+
+            if (optionKey === correctOption) {
+              circle.style.backgroundColor = "green";
+              circle.style.color = "white";
+              optionText.classList.add("correct-text");
+            } else if (option === selectedOptionElement) {
+              circle.style.backgroundColor = "red";
+              circle.style.color = "white";
+              optionText.classList.add("incorrect-text");
+            } else {
+              option.classList.remove("selected");
+            }
+          });
+
+          if (selectedOptionElement) {
+            answered++;
+            const selectedOption = selectedOptionElement.getAttribute("data-option");
+            if (selectedOption === correctOption) {
+              correct++;
+            } else {
+              wrong++;
+            }
+          } else {
+            const questionLabel = questionDiv.querySelector(".question-label");
+            questionLabel.innerHTML += ` <span class="unattempted-text">(অনুত্তরিত)</span>`;
+          }
+
+          const explanationDropdown = questionDiv.querySelector(".explanation-dropdown");
+          if (explanationDropdown) {
+            explanationDropdown.style.display = "block";
+          }
+        });
+
+        const unanswered = totalQuestions - answered;
+        const finalScore = correct * 1 - wrong * 0;
+
+        document.getElementById("popupSerial").innerText = serialNumber;
+        document.getElementById("totalQuestions").innerText = toBengaliNumber(totalQuestions);
+        document.getElementById("answered").innerText = toBengaliNumber(answered);
+        document.getElementById("correctAnswers").innerText = toBengaliNumber(correct);
+        document.getElementById("wrongAnswers").innerText = toBengaliNumber(wrong);
+        document.getElementById("unanswered").innerText = toBengaliNumber(unanswered);
+        document.getElementById("finalScore").innerText = toBengaliNumber(finalScore);
+
+        document.querySelector(".chart-container").classList.add("visible");
+        updateChart(correct, wrong, unanswered);
+
+        document.getElementById("formSerialNumber").value = serialNumber;
+        document.getElementById("formSubmissionTime").value = new Date().toISOString();
+        document.getElementById("formFinalScore").value = finalScore;
+        document.getElementById("formCorrectAnswers").value = correct;
+        document.getElementById("formWrongAnswers").value = wrong;
+        document.getElementById("formUnanswered").value = unanswered;
+
+        showPopup(document.getElementById("scorePopup"));
+        document.getElementById("submitBtn").disabled = true; // Disable instead of hide
+      }
+
+      function showPopup(popupElement) {
+        popupElement.style.display = "block";
+        setTimeout(() => {
+          popupElement.style.transform = "translate(-50%, -50%)";
+          popupElement.style.opacity = "1";
+        }, 10);
+      }
+
+      function hidePopup(popupElement) {
+        popupElement.classList.add("slide-out");
+        setTimeout(() => {
+          popupElement.style.display = "none";
+          popupElement.classList.remove("slide-out");
+          popupElement.style.transform = "translate(-50%, -50%)";
+          popupElement.style.opacity = "1";
+        }, 500);
+      }
+
+      function showConfirmPopup() {
+        showPopup(document.getElementById("confirmPopup"));
+      }
+
+      function confirmSubmit() {
+        hidePopup(document.getElementById("confirmPopup"));
+        calculateScore();
+      }
+
+      function cancelSubmit() {
+        hidePopup(document.getElementById("confirmPopup"));
+      }
+
+      function showErrorPopup() {
+        showPopup(document.getElementById("errorPopup"));
+      }
+
+      function closeErrorPopup() {
+        hidePopup(document.getElementById("errorPopup"));
+      }
+    </script>
+  </body>
+</html>
