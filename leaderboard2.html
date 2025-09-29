@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Hind Siliguri', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .leaderboard-container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            padding: 30px;
+            text-align: center;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 25px;
+            font-weight: 600;
+            font-size: 2.2em;
+            position: relative;
+        }
+        
+        h1::after {
+            content: '';
+            width: 80px;
+            height: 4px;
+            background-color: #007bff;
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        .search-container {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .search-container input {
+            width: 80%;
+            padding: 12px 20px 12px 40px;
+            border-radius: 25px;
+            border: 1px solid #ccc;
+            font-family: 'Hind Siliguri', sans-serif;
+            font-size: 1em;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .search-container input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+        }
+
+        .search-container .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            margin-bottom: 20px;
+        }
+
+        .leaderboard-table th, .leaderboard-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            transition: background-color 0.3s ease;
+        }
+
+        .leaderboard-table th {
+            background-color: #007bff;
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .leaderboard-table tr:not(.highlight):hover {
+            background-color: #f1f1f1;
+        }
+        
+        .leaderboard-table td:first-child {
+            font-weight: bold;
+            color: #555;
+            width: 10%;
+            text-align: center;
+        }
+
+        .leaderboard-table td:nth-child(2) {
+            width: 45%;
+        }
+
+        .leaderboard-table td:last-child {
+            width: 45%;
+        }
+
+        .leaderboard-table tr:nth-child(1),
+        .leaderboard-table tr:nth-child(2),
+        .leaderboard-table tr:nth-child(3) {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .leaderboard-table tr:nth-child(1) td:first-child {
+            color: #ffd700; /* Gold */
+            font-size: 1.2em;
+        }
+
+        .leaderboard-table tr:nth-child(2) td:first-child {
+            color: #c0c0c0; /* Silver */
+            font-size: 1.1em;
+        }
+
+        .leaderboard-table tr:nth-child(3) td:first-child {
+            color: #cd7f32; /* Bronze */
+            font-size: 1.05em;
+        }
+        
+        .leaderboard-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .summary-box {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #e9ecef;
+            text-align: left;
+        }
+        
+        .summary-box p {
+            margin: 8px 0;
+            line-height: 1.6;
+            color: #555;
+            font-size: 1.1em;
+        }
+
+        .summary-box strong {
+            color: #000;
+        }
+
+        .highlight {
+            background-color: #d1ecf1 !important;
+            border: 2px solid #007bff;
+        }
+        
+        @media (max-width: 768px) {
+            .leaderboard-container {
+                padding: 20px 10px;
+            }
+
+            .leaderboard-table th, .leaderboard-table td {
+                padding: 10px 8px;
+                font-size: 0.9em;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="leaderboard-container">
+    <h1>GKE Free exam <br> GK-01</h1>
+
+    <div class="search-container">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="সিরিয়াল দিয়ে সার্চ করো...">
+    </div>
+
+    <table class="leaderboard-table" id="leaderboardTable">
+        <thead>
+            <tr>
+                <th><p>পজিশন</p></th>
+                <th><p> সিরিয়াল</p></th>
+                <th><p>প্রাপ্ত নাম্বার</p></th>
+            </tr>
+        </thead>
+        <tbody>
+
+
+
+
+<tr><td>1</td><td>73500</td><td>50.00</td></tr>
+<tr><td>2</td><td>76191</td><td>50.00</td></tr>
+<tr><td>3</td><td>86246</td><td>50.00</td></tr>
+<tr><td>4</td><td>91462</td><td>50.00</td></tr>
+<tr><td>5</td><td>45853</td><td>47.75</td></tr>
+<tr><td>6</td><td>10208</td><td>47.50</td></tr>
+<tr><td>7</td><td>12345</td><td>47.50</td></tr>
+<tr><td>8</td><td>15706</td><td>47.50</td></tr>
+<tr><td>9</td><td>16605</td><td>47.50</td></tr>
+<tr><td>10</td><td>24506</td><td>47.50</td></tr>
+<tr><td>11</td><td>65534</td><td>47.50</td></tr>
+<tr><td>12</td><td>66711</td><td>47.50</td></tr>
+<tr><td>13</td><td>74318</td><td>47.50</td></tr>
+<tr><td>14</td><td>28566</td><td>48.75</td></tr>
+<tr><td>15</td><td>75708</td><td>48.75</td></tr>
+<tr><td>16</td><td>79233</td><td>48.75</td></tr>
+<tr><td>17</td><td>83851</td><td>48.75</td></tr>
+<tr><td>18</td><td>91099</td><td>47.50</td></tr>
+<tr><td>19</td><td>65675</td><td>46.50</td></tr>
+<tr><td>20</td><td>94243</td><td>46.25</td></tr>
+<tr><td>21</td><td>28436</td><td>46.25</td></tr>
+<tr><td>22</td><td>76241</td><td>45.00</td></tr>
+<tr><td>23</td><td>52519</td><td>45.00</td></tr>
+<tr><td>24</td><td>31162</td><td>44.25</td></tr>
+<tr><td>25</td><td>55232</td><td>44.25</td></tr>
+<tr><td>26</td><td>42345</td><td>44.00</td></tr>
+<tr><td>27</td><td>22335</td><td>43.75</td></tr>
+<tr><td>28</td><td>67125</td><td>43.75</td></tr>
+<tr><td>29</td><td>99887</td><td>43.75</td></tr>
+<tr><td>30</td><td>69811</td><td>43.50</td></tr>
+<tr><td>31</td><td>15505</td><td>42.50</td></tr>
+<tr><td>32</td><td>39193</td><td>42.50</td></tr>
+<tr><td>33</td><td>62255</td><td>42.50</td></tr>
+<tr><td>34</td><td>79467</td><td>42.50</td></tr>
+<tr><td>35</td><td>10527</td><td>41.25</td></tr>
+<tr><td>36</td><td>30088</td><td>41.50</td></tr>
+<tr><td>37</td><td>86278</td><td>41.25</td></tr>
+<tr><td>38</td><td>17083</td><td>40.50</td></tr>
+<tr><td>39</td><td>12468</td><td>40.50</td></tr>
+<tr><td>40</td><td>32087</td><td>40.75</td></tr>
+<tr><td>41</td><td>49683</td><td>40.25</td></tr>
+<tr><td>42</td><td>11234</td><td>39.00</td></tr>
+<tr><td>43</td><td>45470</td><td>39.50</td></tr>
+<tr><td>44</td><td>11262</td><td>39.25</td></tr>
+<tr><td>45</td><td>76191</td><td>39.75</td></tr>
+<tr><td>46</td><td>13835</td><td>38.75</td></tr>
+<tr><td>47</td><td>27447</td><td>38.75</td></tr>
+<tr><td>48</td><td>39155</td><td>38.25</td></tr>
+<tr><td>49</td><td>33097</td><td>38.00</td></tr>
+<tr><td>50</td><td>85424</td><td>38.00</td></tr>
+<tr><td>51</td><td>69840</td><td>37.75</td></tr>
+<tr><td>52</td><td>79467</td><td>37.75</td></tr>
+<tr><td>53</td><td>65986</td><td>37.00</td></tr>
+<tr><td>54</td><td>35197</td><td>36.25</td></tr>
+<tr><td>55</td><td>18960</td><td>35.50</td></tr>
+<tr><td>56</td><td>12948</td><td>35.25</td></tr>
+<tr><td>57</td><td>40932</td><td>35.25</td></tr>
+<tr><td>58</td><td>91099</td><td>35.75</td></tr>
+<tr><td>59</td><td>63518</td><td>35.00</td></tr>
+<tr><td>60</td><td>64736</td><td>35.75</td></tr>
+<tr><td>61</td><td>62370</td><td>33.75</td></tr>
+<tr><td>62</td><td>73674</td><td>33.75</td></tr>
+<tr><td>63</td><td>99519</td><td>32.00</td></tr>
+<tr><td>64</td><td>19297</td><td>32.50</td></tr>
+<tr><td>65</td><td>94829</td><td>32.50</td></tr>
+<tr><td>66</td><td>62890</td><td>31.25</td></tr>
+<tr><td>67</td><td>84218</td><td>31.25</td></tr>
+<tr><td>68</td><td>87665</td><td>31.25</td></tr>
+<tr><td>69</td><td>71273</td><td>30.50</td></tr>
+<tr><td>70</td><td>33491</td><td>30.50</td></tr>
+<tr><td>71</td><td>22222</td><td>30.75</td></tr>
+<tr><td>72</td><td>28436</td><td>30.00</td></tr>
+<tr><td>73</td><td>39100</td><td>28.75</td></tr>
+<tr><td>74</td><td>65849</td><td>28.75</td></tr>
+<tr><td>75</td><td>25801</td><td>25.00</td></tr>
+<tr><td>76</td><td>76167</td><td>25.00</td></tr>
+<tr><td>77</td><td>15215</td><td>24.50</td></tr>
+<tr><td>78</td><td>43210</td><td>24.50</td></tr>
+<tr><td>79</td><td>58437</td><td>22.75</td></tr>
+<tr><td>80</td><td>85634</td><td>22.50</td></tr>
+<tr><td>81</td><td>31493</td><td>22.00</td></tr>
+<tr><td>82</td><td>70460</td><td>21.50</td></tr>
+<tr><td>83</td><td>11111</td><td>21.00</td></tr>
+<tr><td>84</td><td>31131</td><td>20.00</td></tr>
+<tr><td>85</td><td>30822</td><td>19.75</td></tr>
+<tr><td>86</td><td>25065</td><td>19.75</td></tr>
+<tr><td>87</td><td>53262</td><td>18.75</td></tr>
+<tr><td>88</td><td>61726</td><td>18.00</td></tr>
+<tr><td>89</td><td>78553</td><td>18.00</td></tr>
+<tr><td>90</td><td>75025</td><td>18.25</td></tr>
+<tr><td>91</td><td>38348</td><td>17.75</td></tr>
+<tr><td>92</td><td>27447</td><td>17.50</td></tr>
+<tr><td>93</td><td>49754</td><td>14.25</td></tr>
+<tr><td>94</td><td>12628</td><td>13.25</td></tr>
+<tr><td>95</td><td>43382</td><td>13.00</td></tr>
+<tr><td>96</td><td>42647</td><td>12.00</td></tr>
+<tr><td>97</td><td>40880</td><td>10.25</td></tr>
+<tr><td>98</td><td>19929</td><td>10.00</td></tr>
+<tr><td>99</td><td>38784</td><td>10.00</td></tr>
+<tr><td>100</td><td>83857</td><td>9.50</td></tr>
+<tr><td>101</td><td>29504</td><td>9.75</td></tr>
+<tr><td>102</td><td>11051</td><td>8.00</td></tr>
+<tr><td>103</td><td>85032</td><td>7.50</td></tr>
+<tr><td>104</td><td>56265</td><td>7.25</td></tr>
+<tr><td>105</td><td>74125</td><td>7.00</td></tr>
+<tr><td>106</td><td>97232</td><td>6.00</td></tr>
+<tr><td>107</td><td>56731</td><td>5.75</td></tr>
+<tr><td>108</td><td>25369</td><td>5.25</td></tr>
+<tr><td>109</td><td>12375</td><td>5.00</td></tr>
+<tr><td>110</td><td>20245</td><td>5.00</td></tr>
+<tr><td>111</td><td>51573</td><td>4.50</td></tr>
+<tr><td>112</td><td>27565</td><td>3.75</td></tr>
+<tr><td>113</td><td>76757</td><td>3.50</td></tr>
+<tr><td>114</td><td>12468</td><td>3.50</td></tr>
+<tr><td>115</td><td>22665</td><td>2.00</td></tr>
+<tr><td>116</td><td>24020</td><td>2.00</td></tr>
+
+
+
+        </tbody>
+    </table>
+    
+    <div class="summary-box">
+        <p><strong>মোট সাবমিশন:</strong> 116 জন</p>
+        <p><strong>সর্বোচ্চ নাম্বার:</strong> 50.00</p>
+        <p><strong>ন্যূনতম নাম্বার:</strong> 2.00</p>
+    </div>
+
+</div>
+
+<script>
+    // JavaScript for Search and Highlight Functionality
+    function searchTable() {
+        const input = document.getElementById("searchInput");
+        const filter = input.value.toUpperCase();
+        const table = document.getElementById("leaderboardTable");
+        const tr = table.getElementsByTagName("tr");
+        let found = false;
+        
+        // Remove existing highlights
+        for (let i = 1; i < tr.length; i++) {
+            tr[i].classList.remove('highlight');
+        }
+
+        // Search through all table rows, starting from index 1 (to skip the header)
+        for (let i = 1; i < tr.length; i++) {
+            const td_roll = tr[i].getElementsByTagName("td")[1]; // Role/Serial is the second column (index 1)
+            
+            if (td_roll) {
+                const rollText = td_roll.textContent || td_roll.innerText;
+                
+                // Check if the roll number starts with the filter text
+                if (rollText.toUpperCase().startsWith(filter) && filter.length > 0) {
+                    tr[i].style.display = ""; // Show the row
+                    tr[i].classList.add('highlight'); // Highlight the found row
+                    found = true;
+                } else if (filter === "") {
+                    tr[i].style.display = ""; // Show all rows if search box is empty
+                } else {
+                    tr[i].style.display = "none"; // Hide rows that don't match
+                }
+            }       
+        }
+        
+        // If nothing is highlighted and the filter is not empty, you might want a "not found" message,
+        // but for a simple table, hiding non-matches is usually enough.
+    }
+</script>
+
+</body>
+</html>
